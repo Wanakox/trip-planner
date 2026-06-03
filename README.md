@@ -182,13 +182,9 @@ This project is intended to demonstrate practical software engineering skills, i
 
 ## Repository Description
 
-Suggested GitHub repository description:
-
 ```text
 Full-stack travel planning web application built with React, FastAPI, PostgreSQL and Docker.
 ```
-
-Suggested GitHub topics:
 
 ```text
 react typescript fastapi python postgresql docker docker-compose sqlalchemy jwt-authentication material-ui leaflet openstreetmap full-stack rest-api travel-planner portfolio-project
