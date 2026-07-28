@@ -150,8 +150,7 @@ diagrams/
 ├── Diagrama de actividad/
 ├── Diagrama de clases/
 ├── Diagrama E-R.png
-├── EDT.png
-└── Matriz de Trazabilidad.pdf
+└── EDT.png
 ```
 
 ### `arquitectura_sistema.png`
@@ -311,20 +310,6 @@ It divides the project into manageable work packages, including:
 - Documentation
 
 The diagram is used to define the project scope and organize the development work.
-
-### `Matriz de Trazabilidad.pdf`
-
-Graphical or exported version of the traceability matrix.
-
-It represents the relationship between requirements and use cases.
-
-The canonical analysis version is stored in:
-
-```text
-docs/analysis/TripPlanner - Matriz de trazabilidad.pdf
-```
-
-This copy should only remain in `diagrams/` when it is necessary as an exported visual artifact. Otherwise, keeping a single canonical copy in `analysis/` avoids duplication.
 
 ---
 
