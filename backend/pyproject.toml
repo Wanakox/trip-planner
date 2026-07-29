@@ -9,6 +9,9 @@ dependencies = [
     "sqlalchemy",
     "psycopg[binary]",
     "pydantic-settings",
+    "email-validator",
+    "pwdlib[argon2]",
+    "alembic",
 ]
 
 [project.optional-dependencies]
