@@ -13,6 +13,7 @@ dependencies = [
     "pwdlib[argon2]",
     "alembic",
     "PyJWT",
+    "httpx",
 ]
 
 [project.optional-dependencies]

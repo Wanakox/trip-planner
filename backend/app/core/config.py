@@ -25,6 +25,9 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    frankfurter_base_url: str = "https://api.frankfurter.dev/v1"
+    external_api_timeout_seconds: float = 5.0
+
 
 @lru_cache
 def get_settings() -> Settings:
