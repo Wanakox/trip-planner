@@ -4,7 +4,10 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.db.session import engine
 
-router = APIRouter(prefix="/health", tags=["health"])
+router = APIRouter(
+    prefix="/health", 
+    tags=["health"]
+)
 
 
 @router.get(
