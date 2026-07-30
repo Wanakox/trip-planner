@@ -58,3 +58,30 @@ class UserResponse(UserBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+class LoginRequest(BaseModel):
+    identifier: str = Field(
+        min_length=3,
+        max_length=255,
+        description="Username or email address",
+    )
+
+    password: str = Field(
+        min_length=8,
+        max_length=128,
+    )
+
+    @field_validator("identifier")
+    @classmethod
+    def normalize_identifier(cls, value: str) -> str:
+        value = value.strip()
+
+        if not value:
+            raise ValueError("The identifier cannot be empty")
+
+        return value
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"

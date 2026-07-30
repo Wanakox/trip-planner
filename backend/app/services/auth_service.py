@@ -2,16 +2,22 @@ from sqlalchemy.orm import Session
 
 from app.core.exceptions import (
     EmailAlreadyRegisteredError,
+    InvalidCredentialsError,
     UsernameAlreadyRegisteredError,
 )
-from app.core.security import hash_password
-from backend.app.models.user import User
+from app.core.security import (
+    create_access_token,
+    hash_password,
+    verify_password,
+)
+from app.models.user import User
 from app.repositories.user_repository import (
     create_user,
     get_user_by_email,
+    get_user_by_identifier,
     get_user_by_username,
 )
-from backend.app.schemas.user import UserCreate
+from app.schemas.user import UserCreate
 
 
 def register_user(
@@ -37,3 +43,36 @@ def register_user(
     )
 
     return create_user(db, user)
+
+
+def authenticate_user(
+    db: Session,
+    identifier: str,
+    password: str,
+) -> User:
+    user = get_user_by_identifier(db, identifier)
+
+    if user is None:
+        raise InvalidCredentialsError
+
+    if not verify_password(
+        plain_password=password,
+        hashed_password=user.hashed_password,
+    ):
+        raise InvalidCredentialsError
+
+    return user
+
+
+def login_user(
+    db: Session,
+    identifier: str,
+    password: str,
+) -> str:
+    user = authenticate_user(
+        db=db,
+        identifier=identifier,
+        password=password,
+    )
+
+    return create_access_token(subject=str(user.id))

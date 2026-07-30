@@ -4,3 +4,6 @@ class EmailAlreadyRegisteredError(Exception):
 
 class UsernameAlreadyRegisteredError(Exception):
     pass
+
+class InvalidCredentialsError(Exception):
+    pass

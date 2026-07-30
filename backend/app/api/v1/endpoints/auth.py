@@ -5,11 +5,12 @@ from sqlalchemy.orm import Session
 
 from app.core.exceptions import (
     EmailAlreadyRegisteredError,
+    InvalidCredentialsError,
     UsernameAlreadyRegisteredError,
 )
 from app.db.dependencies import get_db
-from app.schemas.user import UserCreate, UserResponse
-from app.services.auth_service import register_user
+from app.schemas.user import LoginRequest, TokenResponse, UserCreate, UserResponse
+from app.services.auth_service import login_user, register_user
 
 router = APIRouter(
     prefix="/auth",
@@ -41,3 +42,30 @@ def register(
             status_code=status.HTTP_409_CONFLICT,
             detail="Username already registered",
         ) from exc
+
+@router.post(
+    "/login",
+    response_model=TokenResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Authenticate a user and return an access token",
+)
+def login(
+    credentials: LoginRequest,
+    db: DatabaseSession,
+) -> TokenResponse:
+    try:
+        access_token = login_user(
+            db=db,
+            identifier=credentials.identifier,
+            password=credentials.password,
+        )
+    except InvalidCredentialsError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect identifier or password",
+            header={"WWW-Authenticate": "Bearer"},
+        ) from exc
+    
+    return TokenResponse(
+        access_token=access_token
+    )

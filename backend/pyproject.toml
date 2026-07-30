@@ -12,6 +12,7 @@ dependencies = [
     "email-validator",
     "pwdlib[argon2]",
     "alembic",
+    "PyJWT",
 ]
 
 [project.optional-dependencies]
