@@ -59,6 +59,7 @@ class UserResponse(UserBase):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class LoginRequest(BaseModel):
     identifier: str = Field(
         min_length=3,
@@ -85,3 +86,63 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+class UserUpdate(UserBase):
+    name: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=100,
+    )
+    
+    surname: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=150,
+    )
+    
+    profile_photo: str | None = Field(
+        default=None,
+        max_length=500,
+    )
+    
+    username: str | None = Field(
+        default=None,
+        min_length=3,
+        max_length=50,
+        pattern=r"^[a-zA-Z0-9_.-]+$",
+    )
+    
+    email: EmailStr | None = None
+    
+    default_currency: str | None = Field(
+        default=None,
+        min_length=3,
+        max_length=3,
+    )
+    
+    @field_validator("name", "surname", "username")
+    @classmethod
+    def remove_surrounding_whitespace(
+        cls,
+        value: str | None,
+    ) -> str | None:
+        if value is None:
+            return None
+
+        value = value.strip()
+
+        if not value:
+            raise ValueError("The field cannot be empty")
+
+        return value
+
+    @field_validator("default_currency")
+    @classmethod
+    def normalize_currency(
+        cls,
+        value: str | None,
+    ) -> str | None:
+        if value is None:
+            return None
+
+        return value.upper()

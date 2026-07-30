@@ -55,3 +55,29 @@ def create_user(
     except Exception:
         db.rollback()
         raise
+
+
+def update_user(
+    db: Session,
+    user: User,
+) -> User:
+    try:
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return user
+    except Exception:
+        db.rollback()
+        raise
+
+
+def delete_user(
+    db: Session,
+    user: User,
+) -> None:
+    try:
+        db.delete(user)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise

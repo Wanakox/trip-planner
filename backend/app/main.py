@@ -13,12 +13,3 @@ app.include_router(
     api_router,
     prefix=settings.api_v1_prefix,
 )
-
-
-@app.get("/", tags=["root"])
-def root() -> dict[str, str]:
-    return {
-        "name": settings.app_name,
-        "version": settings.app_version,
-        "documentation": "/docs",
-    }
