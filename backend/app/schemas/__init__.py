@@ -1,4 +1,4 @@
-from app.schemas.users import UserBase, UserCreate, UserResponse
+from backend.app.schemas.user import UserBase, UserCreate, UserResponse
 
 __all__ = [
     "UserBase",

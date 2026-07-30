@@ -5,13 +5,13 @@ from app.core.exceptions import (
     UsernameAlreadyRegisteredError,
 )
 from app.core.security import hash_password
-from app.models.users import User
+from backend.app.models.user import User
 from app.repositories.user_repository import (
     create_user,
     get_user_by_email,
     get_user_by_username,
 )
-from app.schemas.users import UserCreate
+from backend.app.schemas.user import UserCreate
 
 
 def register_user(

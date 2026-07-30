@@ -8,7 +8,7 @@ from app.core.exceptions import (
     UsernameAlreadyRegisteredError,
 )
 from app.db.dependencies import get_db
-from app.schemas.users import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse
 from app.services.auth_service import register_user
 
 router = APIRouter(

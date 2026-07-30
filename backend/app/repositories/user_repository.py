@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.users import User
+from backend.app.models.user import User
 
 
 def get_user_by_email(
