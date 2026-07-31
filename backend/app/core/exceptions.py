@@ -1,12 +1,24 @@
+# ============================================================
+# AUTENTICACIÓN Y USUARIOS
+# ============================================================
+
+
 class EmailAlreadyRegisteredError(Exception):
-    pass
+    """El correo electrónico ya está asociado a otro usuario."""
 
 
 class UsernameAlreadyRegisteredError(Exception):
-    pass
+    """El nombre de usuario ya está asociado a otro usuario."""
+
 
 class InvalidCredentialsError(Exception):
-    pass
+    """El identificador o la contraseña son incorrectos."""
+
+
+# ============================================================
+# MONEDAS Y SERVICIOS EXTERNOS
+# ============================================================
+
 
 class CurrencyProviderError(Exception):
     """No se pudo obtener información del proveedor de monedas."""
@@ -14,6 +26,11 @@ class CurrencyProviderError(Exception):
 
 class UnsupportedCurrencyError(Exception):
     """El código de moneda no está soportado."""
+
+
+# ============================================================
+# VIAJES
+# ============================================================
 
 
 class TripNotFoundError(Exception):
@@ -27,3 +44,28 @@ class InvalidTripDatesError(Exception):
 class TripNotCompletedError(Exception):
     """El viaje todavía no está completado."""
 
+
+# ============================================================
+# DESTINOS
+# ============================================================
+
+
+class DestinationNotFoundError(Exception):
+    """El destino no existe o no pertenece al viaje indicado."""
+
+
+class LastDestinationDeletionError(Exception):
+    """No se puede eliminar el único destino de un viaje."""
+
+
+class DestinationLimitExceededError(Exception):
+    """El viaje ha alcanzado el número máximo de destinos."""
+
+
+# ============================================================
+# ORDENACIÓN
+# ============================================================
+
+
+class InvalidDestinationOrderError(Exception):
+    """La lista de destinos no representa un orden válido."""

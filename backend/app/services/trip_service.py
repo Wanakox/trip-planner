@@ -1,4 +1,3 @@
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import (
@@ -11,6 +10,10 @@ from app.models.trip import Trip, TripStatus
 from app.models.user import User
 from app.repositories.trip_repository import (
     create_trip_with_destinations,
+    delete_trip as delete_trip_repository,
+    get_trip_by_id_and_user_id,
+    get_trips_by_user_id,
+    update_trip as update_trip_repository,
 )
 from app.schemas.trip import (
     TripCreate,
@@ -19,6 +22,41 @@ from app.schemas.trip import (
 from app.services.currency_service import (
     validate_currency_code,
 )
+
+
+def get_user_trips(
+    db: Session,
+    user: User,
+) -> list[Trip]:
+    """
+    Obtiene todos los viajes del usuario autenticado.
+    """
+
+    return get_trips_by_user_id(
+        db=db,
+        user_id=user.id,
+    )
+
+
+def get_user_trip_by_id(
+    db: Session,
+    user: User,
+    trip_id: int,
+) -> Trip:
+    """
+    Obtiene un viaje perteneciente al usuario autenticado.
+    """
+
+    trip = get_trip_by_id_and_user_id(
+        db=db,
+        trip_id=trip_id,
+        user_id=user.id,
+    )
+
+    if trip is None:
+        raise TripNotFoundError
+
+    return trip
 
 
 def create_trip(
@@ -79,25 +117,19 @@ def update_trip(
     Esta función no modifica los destinos.
     """
 
-    statement = select(Trip).where(
-        Trip.id == trip_id,
-        Trip.user_id == user.id,
+    trip = get_user_trip_by_id(
+        db=db,
+        user=user,
+        trip_id=trip_id,
     )
-
-    trip = db.scalar(statement)
-
-    if trip is None:
-        raise TripNotFoundError
 
     update_data = trip_data.model_dump(
         exclude_unset=True,
     )
 
     if "currency" in update_data:
-        update_data["currency"] = (
-            validate_currency_code(
-                update_data["currency"]
-            )
+        update_data["currency"] = validate_currency_code(
+            update_data["currency"]
         )
 
     updated_start_date = update_data.get(
@@ -120,14 +152,11 @@ def update_trip(
             value,
         )
 
-    try:
-        db.commit()
-        db.refresh(trip)
-    except Exception:
-        db.rollback()
-        raise
+    return update_trip_repository(
+        db=db,
+        trip=trip,
+    )
 
-    return trip
 
 def update_trip_rating(
     db: Session,
@@ -139,26 +168,39 @@ def update_trip_rating(
     Crea o reemplaza la valoración de un viaje completado.
     """
 
-    statement = select(Trip).where(
-        Trip.id == trip_id,
-        Trip.user_id == user.id,
+    trip = get_user_trip_by_id(
+        db=db,
+        user=user,
+        trip_id=trip_id,
     )
-
-    trip = db.scalar(statement)
-
-    if trip is None:
-        raise TripNotFoundError
 
     if trip.status != TripStatus.COMPLETED:
         raise TripNotCompletedError
 
     trip.rating = rating
 
-    try:
-        db.commit()
-        db.refresh(trip)
-    except Exception:
-        db.rollback()
-        raise
+    return update_trip_repository(
+        db=db,
+        trip=trip,
+    )
 
-    return trip
+
+def delete_user_trip(
+    db: Session,
+    user: User,
+    trip_id: int,
+) -> None:
+    """
+    Elimina un viaje perteneciente al usuario autenticado.
+    """
+
+    trip = get_user_trip_by_id(
+        db=db,
+        user=user,
+        trip_id=trip_id,
+    )
+
+    delete_trip_repository(
+        db=db,
+        trip=trip,
+    )

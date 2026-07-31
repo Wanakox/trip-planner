@@ -1,7 +1,19 @@
-from sqlalchemy import BigInteger, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import TYPE_CHECKING
+
+from sqlalchemy import (
+    BigInteger,
+    String,
+)
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    relationship,
+)
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.trip import Trip
 
 
 class User(Base):
@@ -25,17 +37,12 @@ class User(Base):
         nullable=False,
     )
 
-    profile_photo: Mapped[str | None] = mapped_column(
-        "foto_perfil",
-        String(500),
-        nullable=True,
-    )
-
     username: Mapped[str] = mapped_column(
         "nombre_usuario",
         String(50),
         nullable=False,
         unique=True,
+        index=True,
     )
 
     email: Mapped[str] = mapped_column(
@@ -43,6 +50,19 @@ class User(Base):
         String(255),
         nullable=False,
         unique=True,
+        index=True,
+    )
+
+    hashed_password: Mapped[str] = mapped_column(
+        "contrasena_hash",
+        String(255),
+        nullable=False,
+    )
+
+    profile_photo: Mapped[str | None] = mapped_column(
+        "foto_perfil",
+        String(500),
+        nullable=True,
     )
 
     default_currency: Mapped[str] = mapped_column(
@@ -52,16 +72,7 @@ class User(Base):
         default="EUR",
     )
 
-    hashed_password: Mapped[str] = mapped_column(
-        "contrasena_hash",
-        String(255),
-        nullable=False,
-    )
-
     trips: Mapped[list["Trip"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
-        lazy="selectin",
     )
-
-from app.models.trip import Trip  # noqa: E402

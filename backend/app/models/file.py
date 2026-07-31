@@ -5,7 +5,6 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
-    UniqueConstraint,
 )
 from sqlalchemy.orm import (
     Mapped,
@@ -19,16 +18,8 @@ if TYPE_CHECKING:
     from app.models.trip import Trip
 
 
-class Destination(Base):
-    __tablename__ = "destino"
-
-    __table_args__ = (
-        UniqueConstraint(
-            "id_viaje",
-            "orden",
-            name="uq_destino_viaje_orden",
-        ),
-    )
+class TripFile(Base):
+    __tablename__ = "archivo"
 
     id: Mapped[int] = mapped_column(
         BigInteger,
@@ -47,30 +38,30 @@ class Destination(Base):
         index=True,
     )
 
-    country: Mapped[str] = mapped_column(
-        "pais",
-        String(100),
+    name: Mapped[str] = mapped_column(
+        "nombre",
+        String(255),
         nullable=False,
     )
 
-    city: Mapped[str] = mapped_column(
-        "ciudad",
-        String(100),
+    path: Mapped[str] = mapped_column(
+        "ruta",
+        String(500),
         nullable=False,
     )
 
-    order: Mapped[int] = mapped_column(
-        "orden",
-        Integer,
+    extension: Mapped[str] = mapped_column(
+        "extension",
+        String(20),
         nullable=False,
     )
 
-    currency: Mapped[str] = mapped_column(
-        "moneda",
-        String(3),
+    size: Mapped[int] = mapped_column(
+        "tamano",
+        BigInteger,
         nullable=False,
     )
 
     trip: Mapped["Trip"] = relationship(
-        back_populates="destinations",
+        back_populates="files",
     )

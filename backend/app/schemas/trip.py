@@ -56,6 +56,116 @@ class DestinationCreate(BaseModel):
         return value.strip().upper()
 
 
+class DestinationUpdate(BaseModel):
+    country: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=100,
+    )
+
+    city: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=100,
+    )
+
+    currency: str | None = Field(
+        default=None,
+        min_length=3,
+        max_length=3,
+    )
+
+    @field_validator(
+        "country",
+        "city",
+    )
+    @classmethod
+    def normalize_optional_text(
+        cls,
+        value: str | None,
+    ) -> str | None:
+        if value is None:
+            return None
+
+        normalized_value = value.strip()
+
+        if not normalized_value:
+            raise ValueError(
+                "The field cannot be empty"
+            )
+
+        return normalized_value
+
+    @field_validator("currency")
+    @classmethod
+    def normalize_currency(
+        cls,
+        value: str | None,
+    ) -> str | None:
+        if value is None:
+            return None
+
+        return value.strip().upper()
+
+
+class DestinationOrderItem(BaseModel):
+    id: int = Field(
+        gt=0,
+    )
+
+    order: int = Field(
+        ge=1,
+    )
+
+
+class DestinationOrderUpdate(BaseModel):
+    destinations: list[DestinationOrderItem] = Field(
+        min_length=1,
+        max_length=20,
+    )
+
+    @field_validator("destinations")
+    @classmethod
+    def validate_destination_order(
+        cls,
+        value: list[DestinationOrderItem],
+    ) -> list[DestinationOrderItem]:
+        destination_ids = [
+            destination.id
+            for destination in value
+        ]
+
+        orders = [
+            destination.order
+            for destination in value
+        ]
+
+        if len(destination_ids) != len(set(destination_ids)):
+            raise ValueError(
+                "Destination IDs cannot be repeated"
+            )
+
+        if len(orders) != len(set(orders)):
+            raise ValueError(
+                "Destination orders cannot be repeated"
+            )
+
+        expected_orders = list(
+            range(
+                1,
+                len(value) + 1,
+            )
+        )
+
+        if sorted(orders) != expected_orders:
+            raise ValueError(
+                "Destination orders must be consecutive "
+                "and start at 1"
+            )
+
+        return value
+
+
 class DestinationResponse(BaseModel):
     id: int
     country: str

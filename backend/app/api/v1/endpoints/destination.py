@@ -4,7 +4,6 @@ from fastapi import (
     APIRouter,
     Depends,
     HTTPException,
-    Response,
     status,
 )
 from sqlalchemy.orm import Session
@@ -12,32 +11,32 @@ from sqlalchemy.orm import Session
 from app.api.dependencies import get_current_user
 from app.core.exceptions import (
     CurrencyProviderError,
-    InvalidTripDatesError,
-    TripNotCompletedError,
+    DestinationLimitExceededError,
+    DestinationNotFoundError,
+    InvalidDestinationOrderError,
+    LastDestinationDeletionError,
     TripNotFoundError,
     UnsupportedCurrencyError,
 )
 from app.db.dependencies import get_db
 from app.models.user import User
 from app.schemas.trip import (
-    TripCreate,
-    TripRatingUpdate,
+    DestinationCreate,
+    DestinationUpdate,
     TripResponse,
-    TripUpdate,
+    DestinationOrderUpdate,
 )
-from app.services.trip_service import (
-    create_trip,
-    delete_user_trip,
-    get_user_trip_by_id,
-    get_user_trips,
-    update_trip,
-    update_trip_rating,
+from app.services.destination_service import (
+    add_destination_to_trip,
+    delete_destination_from_trip,
+    update_destination_in_trip,
+    reorder_trip_destinations,
 )
 
 
 router = APIRouter(
-    prefix="/trips",
-    tags=["trips"],
+    prefix="/trips/{trip_id}/destinations",
+    tags=["destinations"],
 )
 
 
@@ -52,38 +51,24 @@ DatabaseSession = Annotated[
 ]
 
 
-@router.get(
+@router.post(
     "",
-    response_model=list[TripResponse],
-    status_code=status.HTTP_200_OK,
-    summary="Get all trips for the current user",
-)
-def get_all_user_trips(
-    current_user: CurrentUser,
-    db: DatabaseSession,
-) -> list[TripResponse]:
-    return get_user_trips(
-        db=db,
-        user=current_user,
-    )
-
-
-@router.get(
-    "/{trip_id}",
     response_model=TripResponse,
-    status_code=status.HTTP_200_OK,
-    summary="Get a specific trip by ID for the current user",
+    status_code=status.HTTP_201_CREATED,
+    summary="Add a new destination to a trip",
 )
-def get_trip_by_id(
+def add_new_destination(
     trip_id: int,
+    destination_data: DestinationCreate,
     current_user: CurrentUser,
     db: DatabaseSession,
 ) -> TripResponse:
     try:
-        return get_user_trip_by_id(
+        return add_destination_to_trip(
             db=db,
-            user=current_user,
             trip_id=trip_id,
+            user=current_user,
+            destination_data=destination_data,
         )
 
     except TripNotFoundError as exc:
@@ -92,24 +77,11 @@ def get_trip_by_id(
             detail="Trip not found",
         ) from exc
 
-
-@router.post(
-    "",
-    response_model=TripResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="Create a new trip",
-)
-def create_new_trip(
-    trip_data: TripCreate,
-    current_user: CurrentUser,
-    db: DatabaseSession,
-) -> TripResponse:
-    try:
-        return create_trip(
-            db=db,
-            user=current_user,
-            trip_data=trip_data,
-        )
+    except DestinationLimitExceededError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A trip cannot contain more than 20 destinations",
+        ) from exc
 
     except UnsupportedCurrencyError as exc:
         raise HTTPException(
@@ -125,23 +97,25 @@ def create_new_trip(
 
 
 @router.patch(
-    "/{trip_id}",
+    "/{destination_id}",
     response_model=TripResponse,
     status_code=status.HTTP_200_OK,
-    summary="Update an existing trip",
+    summary="Update a destination in a trip",
 )
-def update_existing_trip(
+def update_existing_destination(
     trip_id: int,
-    trip_data: TripUpdate,
+    destination_id: int,
+    destination_data: DestinationUpdate,
     current_user: CurrentUser,
     db: DatabaseSession,
 ) -> TripResponse:
     try:
-        return update_trip(
+        return update_destination_in_trip(
             db=db,
-            user=current_user,
             trip_id=trip_id,
-            trip_data=trip_data,
+            destination_id=destination_id,
+            user=current_user,
+            destination_data=destination_data,
         )
 
     except TripNotFoundError as exc:
@@ -150,13 +124,10 @@ def update_existing_trip(
             detail="Trip not found",
         ) from exc
 
-    except InvalidTripDatesError as exc:
+    except DestinationNotFoundError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=(
-                "The end date cannot be earlier "
-                "than the start date"
-            ),
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Destination not found",
         ) from exc
 
     except UnsupportedCurrencyError as exc:
@@ -172,24 +143,24 @@ def update_existing_trip(
         ) from exc
 
 
-@router.put(
-    "/{trip_id}/rating",
+@router.delete(
+    "/{destination_id}",
     response_model=TripResponse,
     status_code=status.HTTP_200_OK,
-    summary="Create or update the rating of a completed trip",
+    summary="Delete a destination from a trip",
 )
-def rate_trip(
+def delete_existing_destination(
     trip_id: int,
-    rating_data: TripRatingUpdate,
+    destination_id: int,
     current_user: CurrentUser,
     db: DatabaseSession,
 ) -> TripResponse:
     try:
-        return update_trip_rating(
+        return delete_destination_from_trip(
             db=db,
-            user=current_user,
             trip_id=trip_id,
-            rating=rating_data.rating,
+            destination_id=destination_id,
+            user=current_user,
         )
 
     except TripNotFoundError as exc:
@@ -198,28 +169,37 @@ def rate_trip(
             detail="Trip not found",
         ) from exc
 
-    except TripNotCompletedError as exc:
+    except DestinationNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Destination not found",
+        ) from exc
+
+    except LastDestinationDeletionError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Only completed trips can be rated",
+            detail="A trip must contain at least one destination",
         ) from exc
 
 
-@router.delete(
-    "/{trip_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="Delete a trip by ID",
+@router.put(
+    "/order",
+    response_model=TripResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Reorder the destinations of a trip",
 )
-def delete_trip(
+def reorder_destinations(
     trip_id: int,
+    order_data: DestinationOrderUpdate,
     current_user: CurrentUser,
     db: DatabaseSession,
-) -> Response:
+) -> TripResponse:
     try:
-        delete_user_trip(
+        return reorder_trip_destinations(
             db=db,
-            user=current_user,
             trip_id=trip_id,
+            user=current_user,
+            destination_order_data=order_data,
         )
 
     except TripNotFoundError as exc:
@@ -228,6 +208,11 @@ def delete_trip(
             detail="Trip not found",
         ) from exc
 
-    return Response(
-        status_code=status.HTTP_204_NO_CONTENT,
-    )
+    except InvalidDestinationOrderError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=(
+                "The destination list must contain exactly "
+                "all destinations of the trip"
+            ),
+        ) from exc

@@ -12,7 +12,9 @@ from app.repositories.user_repository import (
     update_user,
 )
 from app.schemas.user import UserUpdate
-from app.services.currency_service import validate_currency_code
+from app.services.currency_service import (
+    validate_currency_code,
+)
 
 
 def update_current_user(
@@ -25,7 +27,9 @@ def update_current_user(
     )
 
     if "email" in update_data:
-        normalized_email = str(update_data["email"]).lower()
+        normalized_email = str(
+            update_data["email"]
+        ).strip().lower()
 
         existing_user = get_user_by_email(
             db=db,
@@ -53,12 +57,18 @@ def update_current_user(
             raise UsernameAlreadyRegisteredError
 
     if "default_currency" in update_data:
-        update_data["default_currency"] = validate_currency_code(
-            update_data["default_currency"]
+        update_data["default_currency"] = (
+            validate_currency_code(
+                update_data["default_currency"]
+            )
         )
 
     for field, value in update_data.items():
-        setattr(user, field, value)
+        setattr(
+            user,
+            field,
+            value,
+        )
 
     return update_user(
         db=db,

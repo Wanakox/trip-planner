@@ -1,6 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    status,
+)
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import (
@@ -9,15 +14,28 @@ from app.core.exceptions import (
     UsernameAlreadyRegisteredError,
 )
 from app.db.dependencies import get_db
-from app.schemas.user import LoginRequest, TokenResponse, UserCreate, UserResponse
-from app.services.auth_service import login_user, register_user
+from app.schemas.user import (
+    LoginRequest,
+    TokenResponse,
+    UserCreate,
+    UserResponse,
+)
+from app.services.auth_service import (
+    login_user,
+    register_user,
+)
+
 
 router = APIRouter(
     prefix="/auth",
     tags=["authentication"],
 )
 
-DatabaseSession = Annotated[Session, Depends(get_db)]
+
+DatabaseSession = Annotated[
+    Session,
+    Depends(get_db),
+]
 
 
 @router.post(
@@ -31,17 +49,23 @@ def register(
     db: DatabaseSession,
 ) -> UserResponse:
     try:
-        return register_user(db, user_data)
+        return register_user(
+            db=db,
+            user_data=user_data,
+        )
+
     except EmailAlreadyRegisteredError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Email already registered",
         ) from exc
+
     except UsernameAlreadyRegisteredError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Username already registered",
         ) from exc
+
 
 @router.post(
     "/login",
@@ -59,13 +83,16 @@ def login(
             identifier=credentials.identifier,
             password=credentials.password,
         )
+
     except InvalidCredentialsError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect identifier or password",
-            header={"WWW-Authenticate": "Bearer"},
+            headers={
+                "WWW-Authenticate": "Bearer",
+            },
         ) from exc
-    
+
     return TokenResponse(
-        access_token=access_token
+        access_token=access_token,
     )

@@ -1,0 +1,121 @@
+from datetime import date, datetime
+from decimal import Decimal
+from enum import StrEnum
+from typing import TYPE_CHECKING
+
+from sqlalchemy import (
+    BigInteger,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Numeric,
+    String,
+)
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    relationship,
+)
+
+from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.trip import Trip
+
+
+class TransportType(StrEnum):
+    FLIGHT = "flight"
+    TRAIN = "train"
+    BUS = "bus"
+    CAR = "car"
+    BOAT = "boat"
+    OTHER = "other"
+
+
+class Transport(Base):
+    __tablename__ = "transporte"
+
+    id: Mapped[int] = mapped_column(
+        BigInteger,
+        primary_key=True,
+        autoincrement=True,
+    )
+
+    trip_id: Mapped[int] = mapped_column(
+        "id_viaje",
+        BigInteger,
+        ForeignKey(
+            "viaje.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    transport_type: Mapped[TransportType] = mapped_column(
+        "tipo",
+        Enum(
+            TransportType,
+            name="transport_type",
+            values_callable=lambda enum_class: [
+                member.value
+                for member in enum_class
+            ],
+        ),
+        nullable=False,
+    )
+
+    price: Mapped[Decimal | None] = mapped_column(
+        "precio",
+        Numeric(
+            precision=12,
+            scale=2,
+        ),
+        nullable=True,
+    )
+
+    departure_datetime: Mapped[datetime] = mapped_column(
+        "fecha_salida",
+        DateTime(timezone=True),
+        nullable=False,
+    )
+
+    arrival_datetime: Mapped[datetime | None] = mapped_column(
+        "fecha_llegada",
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    origin: Mapped[str] = mapped_column(
+        "origen",
+        String(150),
+        nullable=False,
+    )
+
+    destination: Mapped[str] = mapped_column(
+        "destino",
+        String(150),
+        nullable=False,
+    )
+
+    company: Mapped[str | None] = mapped_column(
+        "compania",
+        String(150),
+        nullable=True,
+    )
+
+    check_in_datetime: Mapped[datetime | None] = mapped_column(
+        "fecha_checkin",
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    calendar_event_id: Mapped[str | None] = mapped_column(
+        "id_evento_calendar",
+        String(255),
+        nullable=True,
+    )
+
+    trip: Mapped["Trip"] = relationship(
+        back_populates="transports",
+    )

@@ -5,19 +5,33 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     BigInteger,
+    CheckConstraint,
     Date,
     Enum,
     ForeignKey,
     Numeric,
+    SmallInteger,
     String,
     Text,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    relationship,
+)
 
 from app.db.base import Base
 
 if TYPE_CHECKING:
+    from app.models.accommodation import Accommodation
+    from app.models.activity import Activity
+    from app.models.task import Task
     from app.models.destination import Destination
+    from app.models.file import TripFile
+    from app.models.note import Note
+    from app.models.participant import Participant
+    from app.models.expense import Expense
+    from app.models.transport import Transport
     from app.models.user import User
 
 
@@ -30,6 +44,22 @@ class TripStatus(StrEnum):
 
 class Trip(Base):
     __tablename__ = "viaje"
+
+    __table_args__ = (
+        CheckConstraint(
+            "valoracion IS NULL "
+            "OR valoracion BETWEEN 1 AND 5",
+            name="ck_viaje_valoracion",
+        ),
+        CheckConstraint(
+            "fecha_fin >= fecha_inicio",
+            name="ck_viaje_fechas",
+        ),
+        CheckConstraint(
+            "presupuesto >= 0",
+            name="ck_viaje_presupuesto",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(
         BigInteger,
@@ -110,7 +140,7 @@ class Trip(Base):
 
     rating: Mapped[int | None] = mapped_column(
         "valoracion",
-        BigInteger,
+        SmallInteger,
         nullable=True,
     )
 
@@ -123,4 +153,45 @@ class Trip(Base):
         cascade="all, delete-orphan",
         order_by="Destination.order",
         lazy="selectin",
+    )
+
+    activities: Mapped[list["Activity"]] = relationship(
+        back_populates="trip",
+        cascade="all, delete-orphan",
+    )
+
+    transports: Mapped[list["Transport"]] = relationship(
+        back_populates="trip",
+        cascade="all, delete-orphan",
+    )
+
+    accommodations: Mapped[list["Accommodation"]] = relationship(
+        back_populates="trip",
+        cascade="all, delete-orphan",
+    )
+
+    participants: Mapped[list["Participant"]] = relationship(
+        back_populates="trip",
+        cascade="all, delete-orphan",
+    )
+
+    expenses: Mapped[list["Expense"]] = relationship(
+        back_populates="trip",
+        cascade="all, delete-orphan",
+    )
+
+    tasks: Mapped[list["Task"]] = relationship(
+        back_populates="trip",
+        cascade="all, delete-orphan",
+        order_by="Task.order",
+    )
+
+    notes: Mapped[list["Note"]] = relationship(
+        back_populates="trip",
+        cascade="all, delete-orphan",
+    )
+
+    files: Mapped[list["TripFile"]] = relationship(
+        back_populates="trip",
+        cascade="all, delete-orphan",
     )
