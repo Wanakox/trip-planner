@@ -50,4 +50,5 @@ class Participant(Base):
 
     expenses: Mapped[list["Expense"]] = relationship(
         back_populates="participant",
+        passive_deletes=True,
     )

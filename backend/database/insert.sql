@@ -398,7 +398,8 @@ INSERT INTO gasto (
     nombre,
     cantidad,
     categoria,
-    moneda
+    moneda,
+    fecha
 )
 VALUES
 (
@@ -417,8 +418,9 @@ VALUES
     ),
     'Cena en el puerto',
     32.50,
-    'restauracion',
-    'EUR'
+    'food',
+    'EUR',
+    '2026-05-11'
 ),
 (
     (
@@ -436,8 +438,9 @@ VALUES
     ),
     'Entradas para el Louvre',
     44.00,
-    'ocio',
-    'EUR'
+    'leisure',
+    'EUR',
+    '2026-09-05'
 ),
 (
     (
@@ -455,8 +458,9 @@ VALUES
     ),
     'Autobús de Split a Dubrovnik',
     28.90,
-    'transporte',
-    'EUR'
+    'transport',
+    'EUR',
+    '2026-07-25'
 );
 
 

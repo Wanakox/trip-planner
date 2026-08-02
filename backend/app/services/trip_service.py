@@ -8,6 +8,7 @@ from app.core.exceptions import (
 from app.models.destination import Destination
 from app.models.trip import Trip, TripStatus
 from app.models.user import User
+from app.models.participant import Participant
 from app.repositories.trip_repository import (
     create_trip_with_destinations,
     delete_trip as delete_trip_repository,
@@ -69,7 +70,7 @@ def create_trip(
     """
 
     normalized_trip_currency = validate_currency_code(
-        trip_data.currency
+        user.default_currency
     )
 
     trip = Trip(
@@ -96,6 +97,12 @@ def create_trip(
         for index, destination_data in enumerate(
             trip_data.destinations,
             start=1,
+        )
+    ]
+
+    trip.participants = [
+        Participant(
+            name=f"{user.name} {user.surname}",
         )
     ]
 

@@ -120,3 +120,31 @@ class InvalidAccommodationDatesError(Exception):
 
 class AccommodationOutsideTripDatesError(Exception):
     """El alojamiento se encuentra fuera de las fechas del viaje."""
+
+
+# ============================================================
+# PARTICIPANTES
+# ============================================================
+
+
+class ParticipantNotFoundError(Exception):
+    """El participante no existe o no pertenece al viaje indicado."""
+
+
+class ParticipantHasExpensesError(Exception):
+    """El participante tiene gastos asociados y no puede eliminarse."""
+
+
+# ============================================================
+# GASTOS
+# ============================================================
+
+
+class ExpenseNotFoundError(Exception):
+    """El gasto no existe o no pertenece al viaje indicado."""
+
+
+class InvalidExpenseAmountError(Exception):
+    """La cantidad del gasto debe ser mayor que cero."""
+
+

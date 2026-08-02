@@ -172,6 +172,7 @@ CREATE TABLE gasto (
     cantidad NUMERIC(12, 2) NOT NULL,
     categoria VARCHAR(80) NOT NULL,
     moneda CHAR(3) NOT NULL,
+    fecha DATE NOT NULL,
 
     CONSTRAINT fk_gasto_viaje FOREIGN KEY (id_viaje)
         REFERENCES viaje(id) ON DELETE CASCADE,

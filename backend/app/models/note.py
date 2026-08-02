@@ -52,7 +52,7 @@ class Note(Base):
     )
 
     day_number: Mapped[int | None] = mapped_column(
-        "numero_dia",
+        "num_dia",
         Integer,
         nullable=True,
     )

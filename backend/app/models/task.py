@@ -77,7 +77,7 @@ class Task(Base):
     )
 
     completed: Mapped[bool] = mapped_column(
-        "completada",
+        "completado",
         Boolean,
         nullable=False,
         default=False,

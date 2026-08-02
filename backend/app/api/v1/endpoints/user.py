@@ -57,6 +57,25 @@ def get_me(
     return current_user
 
 
+@router.delete(
+    "/me",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete the authenticated user",
+)
+def delete_me(
+    current_user: CurrentUser,
+    db: DatabaseSession,
+) -> Response:
+    delete_current_user(
+        db=db,
+        user=current_user,
+    )
+
+    return Response(
+        status_code=status.HTTP_204_NO_CONTENT,
+    )
+
+
 @router.patch(
     "/me",
     response_model=UserResponse,
@@ -98,22 +117,3 @@ def update_me(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Currency service is temporarily unavailable",
         ) from exc
-
-
-@router.delete(
-    "/me",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="Delete the authenticated user",
-)
-def delete_me(
-    current_user: CurrentUser,
-    db: DatabaseSession,
-) -> Response:
-    delete_current_user(
-        db=db,
-        user=current_user,
-    )
-
-    return Response(
-        status_code=status.HTTP_204_NO_CONTENT,
-    )

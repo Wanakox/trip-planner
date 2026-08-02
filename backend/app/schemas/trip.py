@@ -204,12 +204,6 @@ class TripCreate(BaseModel):
         decimal_places=2,
     )
 
-    currency: str = Field(
-        default="EUR",
-        min_length=3,
-        max_length=3,
-    )
-
     destinations: list[DestinationCreate] = Field(
         min_length=1,
         max_length=20,
@@ -245,14 +239,6 @@ class TripCreate(BaseModel):
         normalized_value = value.strip()
 
         return normalized_value or None
-
-    @field_validator("currency")
-    @classmethod
-    def normalize_currency(
-        cls,
-        value: str,
-    ) -> str:
-        return value.strip().upper()
 
     @model_validator(mode="after")
     def validate_dates(self) -> Self:
