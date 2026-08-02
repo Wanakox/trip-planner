@@ -69,3 +69,20 @@ class DestinationLimitExceededError(Exception):
 
 class InvalidDestinationOrderError(Exception):
     """La lista de destinos no representa un orden válido."""
+
+
+class InvalidActivityOrderError(Exception):
+    """La lista de actividades no representa un orden válido."""
+
+
+# ============================================================
+# ACTIVIDADES
+# ============================================================
+
+
+class ActivityNotFoundError(Exception):
+    """La actividad no existe o no pertenece al viaje indicado."""
+
+
+class InvalidActivityDayError(Exception):
+    """El número de día no está dentro de la duración del viaje."""

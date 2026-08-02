@@ -108,6 +108,12 @@ class Trip(Base):
         nullable=False,
     )
 
+    @property
+    def total_days(self) -> int:
+        return (
+            self.end_date - self.start_date
+        ).days + 1
+
     budget: Mapped[Decimal] = mapped_column(
         "presupuesto",
         Numeric(

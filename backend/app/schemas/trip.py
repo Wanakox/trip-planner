@@ -377,6 +377,7 @@ class TripResponse(BaseModel):
     description: str | None
     start_date: date
     end_date: date
+    total_days: int
     budget: Decimal
     currency: str
     status: TripStatus

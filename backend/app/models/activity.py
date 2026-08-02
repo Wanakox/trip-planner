@@ -66,13 +66,13 @@ class Activity(Base):
     )
 
     day_number: Mapped[int] = mapped_column(
-        "numero_dia",
+        "num_dia",
         Integer,
         nullable=False,
     )
 
     completed: Mapped[bool] = mapped_column(
-        "completada",
+        "completado",
         Boolean,
         nullable=False,
         default=False,
