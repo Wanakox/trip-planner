@@ -86,3 +86,20 @@ class ActivityNotFoundError(Exception):
 
 class InvalidActivityDayError(Exception):
     """El número de día no está dentro de la duración del viaje."""
+
+
+# ============================================================
+# TRANSPORTES
+# ============================================================
+
+
+class TransportNotFoundError(Exception):
+    """El transporte no existe o no pertenece al viaje indicado."""
+
+
+class InvalidTransportDatesError(Exception):
+    """Las fechas u horas del transporte no son coherentes."""
+
+
+class TransportOutsideTripDatesError(Exception):
+    """El transporte se encuentra fuera de las fechas del viaje."""

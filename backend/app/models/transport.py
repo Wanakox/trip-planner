@@ -1,15 +1,17 @@
-from datetime import date, datetime
+from datetime import date, datetime, time
 from decimal import Decimal
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     BigInteger,
+    Date,
     DateTime,
     Enum,
     ForeignKey,
     Numeric,
     String,
+    Time,
 )
 from sqlalchemy.orm import (
     Mapped,
@@ -74,15 +76,27 @@ class Transport(Base):
         nullable=True,
     )
 
-    departure_datetime: Mapped[datetime] = mapped_column(
+    departure_date: Mapped[date] = mapped_column(
         "fecha_salida",
-        DateTime(timezone=True),
+        Date,
         nullable=False,
     )
 
-    arrival_datetime: Mapped[datetime | None] = mapped_column(
+    arrival_date: Mapped[date | None] = mapped_column(
         "fecha_llegada",
-        DateTime(timezone=True),
+        Date,
+        nullable=True,
+    )
+
+    departure_time: Mapped[time | None] = mapped_column(
+        "hora_salida",
+        Time,
+        nullable=True,
+    )
+
+    arrival_time: Mapped[time | None] = mapped_column(
+        "hora_llegada",
+        Time,
         nullable=True,
     )
 
@@ -98,12 +112,6 @@ class Transport(Base):
         nullable=False,
     )
 
-    company: Mapped[str | None] = mapped_column(
-        "compania",
-        String(150),
-        nullable=True,
-    )
-
     check_in_datetime: Mapped[datetime | None] = mapped_column(
         "fecha_checkin",
         DateTime(timezone=True),
@@ -111,7 +119,7 @@ class Transport(Base):
     )
 
     calendar_event_id: Mapped[str | None] = mapped_column(
-        "id_evento_calendar",
+        "id_evento_calendario",
         String(255),
         nullable=True,
     )
