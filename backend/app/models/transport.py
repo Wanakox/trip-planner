@@ -1,4 +1,4 @@
-from datetime import date, datetime, time
+from datetime import date, time
 from decimal import Decimal
 from enum import StrEnum
 from typing import TYPE_CHECKING
@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 from sqlalchemy import (
     BigInteger,
     Date,
-    DateTime,
     Enum,
     ForeignKey,
     Numeric,
@@ -112,9 +111,9 @@ class Transport(Base):
         nullable=False,
     )
 
-    check_in_datetime: Mapped[datetime | None] = mapped_column(
+    check_in_date: Mapped[date | None] = mapped_column(
         "fecha_checkin",
-        DateTime(timezone=True),
+        Date,
         nullable=True,
     )
 

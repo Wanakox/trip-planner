@@ -1,4 +1,4 @@
-from datetime import date, datetime, time
+from datetime import date, time
 
 from sqlalchemy.orm import Session
 
@@ -72,7 +72,7 @@ def validate_transport_dates(
     arrival_date: date | None,
     departure_time: time | None,
     arrival_time: time | None,
-    check_in_datetime: datetime | None,
+    check_in_date: date | None,
 ) -> None:
     """
     Comprueba la coherencia cronológica de las fechas
@@ -93,23 +93,10 @@ def validate_transport_dates(
     ):
         raise InvalidTransportDatesError
 
-    if check_in_datetime is None:
-        return
-
-    departure_datetime = datetime.combine(
-        departure_date,
-        departure_time or time.min,
-    )
-
     if (
-        check_in_datetime.tzinfo is not None
-        and departure_datetime.tzinfo is None
+        check_in_date is not None
+        and check_in_date > departure_date
     ):
-        departure_datetime = departure_datetime.replace(
-            tzinfo=check_in_datetime.tzinfo,
-        )
-
-    if check_in_datetime > departure_datetime:
         raise InvalidTransportDatesError
 
 
@@ -183,7 +170,7 @@ def add_transport_to_trip(
         arrival_date=transport_data.arrival_date,
         departure_time=transport_data.departure_time,
         arrival_time=transport_data.arrival_time,
-        check_in_datetime=transport_data.check_in_datetime,
+        check_in_date=transport_data.check_in_date,
     )
 
     validate_transport_within_trip(
@@ -202,7 +189,7 @@ def add_transport_to_trip(
         arrival_time=transport_data.arrival_time,
         origin=transport_data.origin,
         destination=transport_data.destination,
-        check_in_datetime=transport_data.check_in_datetime,
+        check_in_date=transport_data.check_in_date,
         calendar_event_id=None,
     )
 
@@ -259,9 +246,9 @@ def update_transport_in_trip(
         transport.arrival_time,
     )
 
-    final_check_in_datetime = update_data.get(
-        "check_in_datetime",
-        transport.check_in_datetime,
+    final_check_in_date = update_data.get(
+        "check_in_date",
+        transport.check_in_date,
     )
 
     validate_transport_dates(
@@ -269,7 +256,7 @@ def update_transport_in_trip(
         arrival_date=final_arrival_date,
         departure_time=final_departure_time,
         arrival_time=final_arrival_time,
-        check_in_datetime=final_check_in_datetime,
+        check_in_date=final_check_in_date,
     )
 
     validate_transport_within_trip(

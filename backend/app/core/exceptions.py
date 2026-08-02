@@ -103,3 +103,20 @@ class InvalidTransportDatesError(Exception):
 
 class TransportOutsideTripDatesError(Exception):
     """El transporte se encuentra fuera de las fechas del viaje."""
+
+
+# ============================================================
+# ALOJAMIENTOS
+# ============================================================
+
+
+class AccommodationNotFoundError(Exception):
+    """El alojamiento no existe o no pertenece al viaje indicado."""
+
+
+class InvalidAccommodationDatesError(Exception):
+    """Las fechas u horas del alojamiento no son coherentes."""
+
+
+class AccommodationOutsideTripDatesError(Exception):
+    """El alojamiento se encuentra fuera de las fechas del viaje."""

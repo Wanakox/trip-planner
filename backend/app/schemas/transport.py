@@ -1,4 +1,4 @@
-from datetime import date, datetime, time
+from datetime import date, time
 from decimal import Decimal
 from typing import Self
 
@@ -39,7 +39,7 @@ class TransportBase(BaseModel):
         max_length=150,
     )
 
-    check_in_datetime: datetime | None = None
+    check_in_date: date | None = None
 
     @field_validator(
         "origin",
@@ -81,21 +81,13 @@ class TransportBase(BaseModel):
                 "than the departure time on the same day"
             )
 
-        departure_datetime = datetime.combine(
-            self.departure_date,
-            self.departure_time or time.min,
-            tzinfo=self.check_in_datetime.tzinfo
-            if self.check_in_datetime is not None
-            else None,
-        )
-
         if (
-            self.check_in_datetime is not None
-            and self.check_in_datetime > departure_datetime
+            self.check_in_date is not None
+            and self.check_in_date > self.departure_date
         ):
             raise ValueError(
-                "The check-in date and time cannot be "
-                "later than the departure date and time"
+                "The check-in date cannot be later "
+                "than the departure date"
             )
 
         return self
@@ -133,7 +125,7 @@ class TransportUpdate(BaseModel):
         max_length=150,
     )
 
-    check_in_datetime: datetime | None = None
+    check_in_date: date | None = None
 
     @field_validator(
         "origin",
@@ -173,7 +165,7 @@ class TransportResponse(BaseModel):
     origin: str
     destination: str
 
-    check_in_datetime: datetime | None = None
+    check_in_date: date | None = None
     calendar_event_id: str | None = None
 
     model_config = ConfigDict(

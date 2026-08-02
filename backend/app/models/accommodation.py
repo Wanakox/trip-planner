@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, time
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
@@ -8,6 +8,7 @@ from sqlalchemy import (
     ForeignKey,
     Numeric,
     String,
+    Time,
 )
 from sqlalchemy.orm import (
     Mapped,
@@ -63,19 +64,31 @@ class Accommodation(Base):
     )
 
     check_in_date: Mapped[date] = mapped_column(
-        "fecha_entrada",
+        "fecha_checkin",
         Date,
         nullable=False,
     )
 
     check_out_date: Mapped[date] = mapped_column(
-        "fecha_salida",
+        "fecha_checkout",
         Date,
         nullable=False,
     )
 
+    check_in_time: Mapped[time | None] = mapped_column(
+        "hora_checkin",
+        Time,
+        nullable=True,
+    )
+    
+    check_out_time: Mapped[time | None] = mapped_column(
+        "hora_checkout",
+        Time,
+        nullable=True,
+    )
+
     calendar_event_id: Mapped[str | None] = mapped_column(
-        "id_evento_calendar",
+        "id_evento_calendario",
         String(255),
         nullable=True,
     )
