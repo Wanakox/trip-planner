@@ -11,6 +11,7 @@ from app.api.v1.endpoints.transport import router as transport_router
 from app.api.v1.endpoints.accommodation import router as accommodation_router
 from app.api.v1.endpoints.participant import router as participants_router
 from app.api.v1.endpoints.expense import router as expenses_router
+from app.api.v1.endpoints.task import router as tasks_router
 
 api_router = APIRouter()
 
@@ -22,6 +23,7 @@ api_router.include_router(destinations_router)
 api_router.include_router(activities_router)
 api_router.include_router(transport_router)
 api_router.include_router(accommodation_router)
+api_router.include_router(tasks_router)
 api_router.include_router(participants_router)
 api_router.include_router(expenses_router)
 api_router.include_router(currency_router)

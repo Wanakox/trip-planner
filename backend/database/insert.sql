@@ -173,7 +173,7 @@ VALUES
     ),
     'Comprobar la documentación de viaje',
     1,
-    'alta',
+    'high',
     TRUE
 ),
 (
@@ -184,7 +184,7 @@ VALUES
     ),
     'Reservar entradas para el Museo del Louvre',
     1,
-    'alta',
+    'high',
     FALSE
 ),
 (
@@ -195,7 +195,7 @@ VALUES
     ),
     'Descargar los billetes de autobús',
     1,
-    'media',
+    'medium',
     TRUE
 );
 

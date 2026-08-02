@@ -148,3 +148,19 @@ class InvalidExpenseAmountError(Exception):
     """La cantidad del gasto debe ser mayor que cero."""
 
 
+# ============================================================
+# TAREAS
+# ============================================================
+
+
+class TaskNotFoundError(Exception):
+    """La tarea no existe o no pertenece al viaje indicado."""
+
+
+class InvalidTaskOrderError(Exception):
+    """
+    La lista de ordenación no contiene exactamente todas
+    las tareas del viaje o sus posiciones no son válidas.
+    """
+
+
