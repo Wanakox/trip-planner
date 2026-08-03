@@ -164,3 +164,63 @@ class InvalidTaskOrderError(Exception):
     """
 
 
+# ============================================================
+# NOTAS
+# ============================================================
+
+
+class NoteNotFoundError(Exception):
+    """La nota no existe o no pertenece al viaje indicado."""
+
+
+class InvalidNoteDayError(Exception):
+    """El número de día no está dentro de la duración del viaje."""
+
+
+class NoteLimitExceededError(Exception):
+    """
+    El viaje ha alcanzado el número máximo de notas permitido.
+    """
+
+
+class NoteDayAlreadyExistsError(Exception):
+    """Ya existe una nota asociada al día indicado del viaje."""
+
+
+# ============================================================
+# ARCHIVOS
+# ============================================================
+
+
+class TripFileNotFoundError(Exception):
+    """
+    El archivo no existe o no pertenece
+    al viaje indicado.
+    """
+
+
+class TripFileLimitExceededError(Exception):
+    """
+    El viaje ha alcanzado el máximo
+    de archivos permitido.
+    """
+
+
+class TripFileStorageError(Exception):
+    """
+    Se produjo un error al guardar o eliminar
+    el archivo en el almacenamiento.
+    """
+
+
+# ============================================================
+# EXPORTACIÓN DE VIAJES
+# ============================================================
+
+
+class TripExportError(Exception):
+    """Raised when a trip export cannot be generated."""
+
+    pass
+
+

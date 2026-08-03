@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     frankfurter_base_url: str = "https://api.frankfurter.dev/v1"
     external_api_timeout_seconds: float = 5.0
 
+    trip_files_storage_path: str = "storage/trips"
+    profile_images_storage_path: str = "storage/profile"
+
 
 @lru_cache
 def get_settings() -> Settings:

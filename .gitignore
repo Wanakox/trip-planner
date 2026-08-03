@@ -142,3 +142,14 @@ logs/
 
 docker-compose.override.yml
 compose.override.yml
+
+# ============================================================
+# Backend storage
+# ============================================================
+
+backend/storage/*
+!backend/storage/.gitkeep
+!backend/storage/profile/
+!backend/storage/profile/.gitkeep
+!backend/storage/trips/
+!backend/storage/trips/.gitkeep

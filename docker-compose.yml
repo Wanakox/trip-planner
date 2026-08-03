@@ -49,6 +49,7 @@ services:
     volumes:
       - ./backend/app:/app/app
       - ./backend/tests:/app/tests
+      - ./backend/storage:/app/storage
     command:
       [
         "uvicorn",
