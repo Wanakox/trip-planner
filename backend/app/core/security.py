@@ -6,6 +6,7 @@ from pwdlib import PasswordHash
 
 from app.core.config import settings
 
+
 password_hash = PasswordHash.recommended()
 
 
@@ -40,6 +41,7 @@ def create_access_token(
 
     payload = {
         "sub": subject,
+        "type": "access",
         "exp": expires_at,
     }
 
@@ -50,17 +52,73 @@ def create_access_token(
     )
 
 
-def decode_access_token(token: str) -> dict[str, Any]:
+def create_refresh_token(
+    subject: str,
+    expires_delta: timedelta | None = None,
+) -> str:
+    if expires_delta is None:
+        expires_delta = timedelta(
+            days=settings.refresh_token_expire_days,
+        )
+
+    expires_at = datetime.now(UTC) + expires_delta
+
+    payload = {
+        "sub": subject,
+        "type": "refresh",
+        "exp": expires_at,
+    }
+
+    return jwt.encode(
+        payload,
+        settings.jwt_secret_key,
+        algorithm=settings.jwt_algorithm,
+    )
+
+
+def decode_access_token(
+    token: str,
+) -> dict[str, Any]:
     """Valida y decodifica un access token."""
 
-    return jwt.decode(
+    payload = jwt.decode(
         token,
         settings.jwt_secret_key,
         algorithms=[settings.jwt_algorithm],
         options={
             "require": [
                 "sub",
+                "type",
                 "exp",
             ],
         },
     )
+
+    if payload.get("type") != "access":
+        raise jwt.InvalidTokenError
+
+    return payload
+
+
+def decode_refresh_token(
+    token: str,
+) -> dict[str, Any]:
+    """Valida y decodifica un refresh token."""
+
+    payload = jwt.decode(
+        token,
+        settings.jwt_secret_key,
+        algorithms=[settings.jwt_algorithm],
+        options={
+            "require": [
+                "sub",
+                "type",
+                "exp",
+            ],
+        },
+    )
+
+    if payload.get("type") != "refresh":
+        raise jwt.InvalidTokenError
+
+    return payload

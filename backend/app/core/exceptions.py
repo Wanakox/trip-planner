@@ -224,3 +224,12 @@ class TripExportError(Exception):
     pass
 
 
+# ============================================================
+# VUELOS Y SERVICIOS EXTERNOS
+# ============================================================
+
+
+class FlightProviderError(Exception):
+    """No se pudo obtener información del proveedor de vuelos."""
+
+

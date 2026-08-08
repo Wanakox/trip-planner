@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 7
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -30,6 +31,10 @@ class Settings(BaseSettings):
 
     trip_files_storage_path: str = "storage/trips"
     profile_images_storage_path: str = "storage/profile"
+
+    duffel_access_token: str
+    duffel_base_url: str = "https://api.duffel.com"
+    duffel_api_version: str = "v2"
 
 
 @lru_cache

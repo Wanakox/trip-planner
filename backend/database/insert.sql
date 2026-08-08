@@ -302,8 +302,7 @@ INSERT INTO alojamiento (
     fecha_checkout,
     hora_checkin,
     hora_checkout,
-    precio,
-    id_evento_calendario
+    precio
 )
 VALUES
 (
@@ -318,8 +317,7 @@ VALUES
     '2026-05-17',
     '15:00',
     '11:00',
-    420.00,
-    'google-calendar-creta-accommodation-001'
+    420.00
 ),
 (
     (
@@ -333,8 +331,7 @@ VALUES
     '2026-09-08',
     '14:00',
     '11:00',
-    640.00,
-    NULL
+    640.00
 ),
 (
     (
@@ -348,8 +345,7 @@ VALUES
     '2026-07-25',
     '15:30',
     '10:30',
-    310.00,
-    NULL
+    310.00
 );
 
 
@@ -478,8 +474,7 @@ INSERT INTO transporte (
     hora_llegada,
     origen,
     destino,
-    fecha_checkin,
-    id_evento_calendario
+    fecha_checkin
 )
 VALUES
 (
@@ -496,8 +491,7 @@ VALUES
     '14:10',
     'Aeropuerto de Málaga',
     'Aeropuerto de Heraclión',
-    '2026-05-09',
-    'google-calendar-creta-flight-001'
+    '2026-05-09'
 ),
 (
     (
@@ -513,8 +507,7 @@ VALUES
     '10:20',
     'Aeropuerto Adolfo Suárez Madrid-Barajas',
     'Aeropuerto Charles de Gaulle',
-    '2026-09-03',
-    NULL
+    '2026-09-03'
 ),
 (
     (
@@ -530,7 +523,6 @@ VALUES
     '12:30',
     'Estación de autobuses de Split',
     'Estación de autobuses de Dubrovnik',
-    NULL,
     NULL
 );
 

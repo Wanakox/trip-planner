@@ -124,7 +124,6 @@ CREATE TABLE alojamiento (
     hora_checkin TIME,
     hora_checkout TIME,
     precio NUMERIC(12, 2),
-    id_evento_calendario VARCHAR(255),
 
     CONSTRAINT fk_alojamiento_viaje FOREIGN KEY (id_viaje)
         REFERENCES viaje(id) ON DELETE CASCADE,
@@ -195,7 +194,6 @@ CREATE TABLE transporte (
     origen VARCHAR(200) NOT NULL,
     destino VARCHAR(200) NOT NULL,
     fecha_checkin DATE,
-    id_evento_calendario VARCHAR(255),
 
     CONSTRAINT fk_transporte_viaje FOREIGN KEY (id_viaje)
         REFERENCES viaje(id) ON DELETE CASCADE,

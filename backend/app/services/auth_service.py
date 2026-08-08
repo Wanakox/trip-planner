@@ -7,6 +7,8 @@ from app.core.exceptions import (
 )
 from app.core.security import (
     create_access_token,
+    create_refresh_token,
+    decode_refresh_token,
     hash_password,
     verify_password,
 )
@@ -90,13 +92,35 @@ def login_user(
     db: Session,
     identifier: str,
     password: str,
-) -> str:
+) -> tuple[str, str]:
     user = authenticate_user(
         db=db,
         identifier=identifier,
         password=password,
     )
 
+    subject = str(user.id)
+
+    access_token = create_access_token(
+        subject=subject,
+    )
+
+    refresh_token = create_refresh_token(
+        subject=subject,
+    )
+
+    return access_token, refresh_token
+
+
+def refresh_access_token(
+    refresh_token: str,
+) -> str:
+    payload = decode_refresh_token(
+        refresh_token
+    )
+
+    subject = payload["sub"]
+
     return create_access_token(
-        subject=str(user.id),
+        subject=subject,
     )
