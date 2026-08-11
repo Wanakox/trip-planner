@@ -51,6 +51,5 @@ def test_all_exported_error_classes_inherit_from_the_common_base() -> None:
 
     assert error_classes
     assert all(
-        issubclass(error_class, exceptions.TripPlannerError)
-        for error_class in error_classes
+        issubclass(error_class, exceptions.TripPlannerError) for error_class in error_classes
     )

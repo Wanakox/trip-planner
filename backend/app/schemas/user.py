@@ -13,8 +13,8 @@ class UserBase(BaseModel):
     )
 
     profile_photo: str | None = Field(
-            default=None,
-            max_length=500,
+        default=None,
+        max_length=500,
     )
 
     username: str = Field(
@@ -31,7 +31,7 @@ class UserBase(BaseModel):
         max_length=3,
     )
 
-    @field_validator("name", "surname", "username")
+    @field_validator("name", "surname", "username", mode="before")
     @classmethod
     def remove_surrounding_whitespace(cls, value: str) -> str:
         value = value.strip()
@@ -91,41 +91,42 @@ class TokenResponse(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
-    
+
+
 class UserUpdate(UserBase):
     name: str | None = Field(
         default=None,
         min_length=1,
         max_length=100,
     )
-    
+
     surname: str | None = Field(
         default=None,
         min_length=1,
         max_length=150,
     )
-    
+
     profile_photo: str | None = Field(
         default=None,
         max_length=500,
     )
-    
+
     username: str | None = Field(
         default=None,
         min_length=3,
         max_length=50,
         pattern=r"^[a-zA-Z0-9_.-]+$",
     )
-    
+
     email: EmailStr | None = None
-    
+
     default_currency: str | None = Field(
         default=None,
         min_length=3,
         max_length=3,
     )
-    
-    @field_validator("name", "surname", "username")
+
+    @field_validator("name", "surname", "username", mode="before")
     @classmethod
     def remove_surrounding_whitespace(
         cls,
