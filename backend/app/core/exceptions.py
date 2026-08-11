@@ -1,18 +1,33 @@
+class TripPlannerError(Exception):
+    """Base exception with a user-facing default message."""
+
+    default_message = "Se ha producido un error en TripPlanner."
+
+    def __init__(self, message: str | None = None) -> None:
+        super().__init__(message or self.default_message)
+
+
 # ============================================================
 # AUTENTICACIÓN Y USUARIOS
 # ============================================================
 
 
-class EmailAlreadyRegisteredError(Exception):
+class EmailAlreadyRegisteredError(TripPlannerError):
     """El correo electrónico ya está asociado a otro usuario."""
 
+    default_message = "El correo electrónico ya está asociado a otro usuario."
 
-class UsernameAlreadyRegisteredError(Exception):
+
+class UsernameAlreadyRegisteredError(TripPlannerError):
     """El nombre de usuario ya está asociado a otro usuario."""
 
+    default_message = "El nombre de usuario ya está asociado a otro usuario."
 
-class InvalidCredentialsError(Exception):
+
+class InvalidCredentialsError(TripPlannerError):
     """El identificador o la contraseña son incorrectos."""
+
+    default_message = "El identificador o la contraseña son incorrectos."
 
 
 # ============================================================
@@ -20,12 +35,16 @@ class InvalidCredentialsError(Exception):
 # ============================================================
 
 
-class CurrencyProviderError(Exception):
+class CurrencyProviderError(TripPlannerError):
     """No se pudo obtener información del proveedor de monedas."""
 
+    default_message = "No se pudo obtener información del proveedor de monedas."
 
-class UnsupportedCurrencyError(Exception):
+
+class UnsupportedCurrencyError(TripPlannerError):
     """El código de moneda no está soportado."""
+
+    default_message = "El código de moneda no está soportado."
 
 
 # ============================================================
@@ -33,16 +52,22 @@ class UnsupportedCurrencyError(Exception):
 # ============================================================
 
 
-class TripNotFoundError(Exception):
+class TripNotFoundError(TripPlannerError):
     """El viaje no existe o no pertenece al usuario."""
 
+    default_message = "El viaje no existe o no pertenece al usuario."
 
-class InvalidTripDatesError(Exception):
+
+class InvalidTripDatesError(TripPlannerError):
     """La fecha final es anterior a la fecha inicial."""
 
+    default_message = "La fecha final es anterior a la fecha inicial."
 
-class TripNotCompletedError(Exception):
+
+class TripNotCompletedError(TripPlannerError):
     """El viaje todavía no está completado."""
+
+    default_message = "El viaje todavía no está completado."
 
 
 # ============================================================
@@ -50,16 +75,22 @@ class TripNotCompletedError(Exception):
 # ============================================================
 
 
-class DestinationNotFoundError(Exception):
+class DestinationNotFoundError(TripPlannerError):
     """El destino no existe o no pertenece al viaje indicado."""
 
+    default_message = "El destino no existe o no pertenece al viaje indicado."
 
-class LastDestinationDeletionError(Exception):
+
+class LastDestinationDeletionError(TripPlannerError):
     """No se puede eliminar el único destino de un viaje."""
 
+    default_message = "No se puede eliminar el único destino de un viaje."
 
-class DestinationLimitExceededError(Exception):
+
+class DestinationLimitExceededError(TripPlannerError):
     """El viaje ha alcanzado el número máximo de destinos."""
+
+    default_message = "El viaje ha alcanzado el número máximo de destinos."
 
 
 # ============================================================
@@ -67,12 +98,16 @@ class DestinationLimitExceededError(Exception):
 # ============================================================
 
 
-class InvalidDestinationOrderError(Exception):
+class InvalidDestinationOrderError(TripPlannerError):
     """La lista de destinos no representa un orden válido."""
 
+    default_message = "La lista de destinos no representa un orden válido."
 
-class InvalidActivityOrderError(Exception):
+
+class InvalidActivityOrderError(TripPlannerError):
     """La lista de actividades no representa un orden válido."""
+
+    default_message = "La lista de actividades no representa un orden válido."
 
 
 # ============================================================
@@ -80,12 +115,16 @@ class InvalidActivityOrderError(Exception):
 # ============================================================
 
 
-class ActivityNotFoundError(Exception):
+class ActivityNotFoundError(TripPlannerError):
     """La actividad no existe o no pertenece al viaje indicado."""
 
+    default_message = "La actividad no existe o no pertenece al viaje indicado."
 
-class InvalidActivityDayError(Exception):
+
+class InvalidActivityDayError(TripPlannerError):
     """El número de día no está dentro de la duración del viaje."""
+
+    default_message = "El número de día no está dentro de la duración del viaje."
 
 
 # ============================================================
@@ -93,16 +132,22 @@ class InvalidActivityDayError(Exception):
 # ============================================================
 
 
-class TransportNotFoundError(Exception):
+class TransportNotFoundError(TripPlannerError):
     """El transporte no existe o no pertenece al viaje indicado."""
 
+    default_message = "El transporte no existe o no pertenece al viaje indicado."
 
-class InvalidTransportDatesError(Exception):
+
+class InvalidTransportDatesError(TripPlannerError):
     """Las fechas u horas del transporte no son coherentes."""
 
+    default_message = "Las fechas u horas del transporte no son coherentes."
 
-class TransportOutsideTripDatesError(Exception):
+
+class TransportOutsideTripDatesError(TripPlannerError):
     """El transporte se encuentra fuera de las fechas del viaje."""
+
+    default_message = "El transporte se encuentra fuera de las fechas del viaje."
 
 
 # ============================================================
@@ -110,16 +155,22 @@ class TransportOutsideTripDatesError(Exception):
 # ============================================================
 
 
-class AccommodationNotFoundError(Exception):
+class AccommodationNotFoundError(TripPlannerError):
     """El alojamiento no existe o no pertenece al viaje indicado."""
 
+    default_message = "El alojamiento no existe o no pertenece al viaje indicado."
 
-class InvalidAccommodationDatesError(Exception):
+
+class InvalidAccommodationDatesError(TripPlannerError):
     """Las fechas u horas del alojamiento no son coherentes."""
 
+    default_message = "Las fechas u horas del alojamiento no son coherentes."
 
-class AccommodationOutsideTripDatesError(Exception):
+
+class AccommodationOutsideTripDatesError(TripPlannerError):
     """El alojamiento se encuentra fuera de las fechas del viaje."""
+
+    default_message = "El alojamiento se encuentra fuera de las fechas del viaje."
 
 
 # ============================================================
@@ -127,12 +178,16 @@ class AccommodationOutsideTripDatesError(Exception):
 # ============================================================
 
 
-class ParticipantNotFoundError(Exception):
+class ParticipantNotFoundError(TripPlannerError):
     """El participante no existe o no pertenece al viaje indicado."""
 
+    default_message = "El participante no existe o no pertenece al viaje indicado."
 
-class ParticipantHasExpensesError(Exception):
+
+class ParticipantHasExpensesError(TripPlannerError):
     """El participante tiene gastos asociados y no puede eliminarse."""
+
+    default_message = "El participante tiene gastos asociados y no puede eliminarse."
 
 
 # ============================================================
@@ -140,12 +195,16 @@ class ParticipantHasExpensesError(Exception):
 # ============================================================
 
 
-class ExpenseNotFoundError(Exception):
+class ExpenseNotFoundError(TripPlannerError):
     """El gasto no existe o no pertenece al viaje indicado."""
 
+    default_message = "El gasto no existe o no pertenece al viaje indicado."
 
-class InvalidExpenseAmountError(Exception):
+
+class InvalidExpenseAmountError(TripPlannerError):
     """La cantidad del gasto debe ser mayor que cero."""
+
+    default_message = "La cantidad del gasto debe ser mayor que cero."
 
 
 # ============================================================
@@ -153,15 +212,16 @@ class InvalidExpenseAmountError(Exception):
 # ============================================================
 
 
-class TaskNotFoundError(Exception):
+class TaskNotFoundError(TripPlannerError):
     """La tarea no existe o no pertenece al viaje indicado."""
 
+    default_message = "La tarea no existe o no pertenece al viaje indicado."
 
-class InvalidTaskOrderError(Exception):
-    """
-    La lista de ordenación no contiene exactamente todas
-    las tareas del viaje o sus posiciones no son válidas.
-    """
+
+class InvalidTaskOrderError(TripPlannerError):
+    """La lista de tareas no representa un orden válido."""
+
+    default_message = "La lista de tareas no representa un orden válido."
 
 
 # ============================================================
@@ -169,22 +229,28 @@ class InvalidTaskOrderError(Exception):
 # ============================================================
 
 
-class NoteNotFoundError(Exception):
+class NoteNotFoundError(TripPlannerError):
     """La nota no existe o no pertenece al viaje indicado."""
 
+    default_message = "La nota no existe o no pertenece al viaje indicado."
 
-class InvalidNoteDayError(Exception):
+
+class InvalidNoteDayError(TripPlannerError):
     """El número de día no está dentro de la duración del viaje."""
 
-
-class NoteLimitExceededError(Exception):
-    """
-    El viaje ha alcanzado el número máximo de notas permitido.
-    """
+    default_message = "El número de día no está dentro de la duración del viaje."
 
 
-class NoteDayAlreadyExistsError(Exception):
+class NoteLimitExceededError(TripPlannerError):
+    """El viaje ha alcanzado el número máximo de notas permitido."""
+
+    default_message = "El viaje ha alcanzado el número máximo de notas permitido."
+
+
+class NoteDayAlreadyExistsError(TripPlannerError):
     """Ya existe una nota asociada al día indicado del viaje."""
+
+    default_message = "Ya existe una nota asociada al día indicado del viaje."
 
 
 # ============================================================
@@ -192,25 +258,22 @@ class NoteDayAlreadyExistsError(Exception):
 # ============================================================
 
 
-class TripFileNotFoundError(Exception):
-    """
-    El archivo no existe o no pertenece
-    al viaje indicado.
-    """
+class TripFileNotFoundError(TripPlannerError):
+    """El archivo no existe o no pertenece al viaje indicado."""
+
+    default_message = "El archivo no existe o no pertenece al viaje indicado."
 
 
-class TripFileLimitExceededError(Exception):
-    """
-    El viaje ha alcanzado el máximo
-    de archivos permitido.
-    """
+class TripFileLimitExceededError(TripPlannerError):
+    """El viaje ha alcanzado el número máximo de archivos permitido."""
+
+    default_message = "El viaje ha alcanzado el número máximo de archivos permitido."
 
 
-class TripFileStorageError(Exception):
-    """
-    Se produjo un error al guardar o eliminar
-    el archivo en el almacenamiento.
-    """
+class TripFileStorageError(TripPlannerError):
+    """Se produjo un error al gestionar el archivo almacenado."""
+
+    default_message = "Se produjo un error al gestionar el archivo almacenado."
 
 
 # ============================================================
@@ -218,10 +281,10 @@ class TripFileStorageError(Exception):
 # ============================================================
 
 
-class TripExportError(Exception):
-    """Raised when a trip export cannot be generated."""
+class TripExportError(TripPlannerError):
+    """No se pudo generar la exportación del viaje."""
 
-    pass
+    default_message = "No se pudo generar la exportación del viaje."
 
 
 # ============================================================
@@ -229,7 +292,7 @@ class TripExportError(Exception):
 # ============================================================
 
 
-class FlightProviderError(Exception):
+class FlightProviderError(TripPlannerError):
     """No se pudo obtener información del proveedor de vuelos."""
 
-
+    default_message = "No se pudo obtener información del proveedor de vuelos."
