@@ -3,19 +3,45 @@ import { createTheme } from '@mui/material/styles'
 export const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#115bca',
+      dark: '#0d47a1',
+      light: '#dbecff',
     },
     secondary: {
-      main: '#2e7d32',
+      main: '#067f56',
     },
     background: {
-      default: '#f5f7fa',
+      default: '#f7fafd',
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#0b1a2f',
+      secondary: '#475569',
     },
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: 'Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    button: {
+      fontWeight: 600,
+      textTransform: 'none',
+    },
   },
   shape: {
-    borderRadius: 8,
+    borderRadius: 12,
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          minHeight: 48,
+          boxShadow: 'none',
+        },
+      },
+    },
+    MuiTextField: {
+      defaultProps: {
+        fullWidth: true,
+      },
+    },
   },
 })
