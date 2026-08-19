@@ -16,11 +16,11 @@ export type TokenResponse = {
 }
 
 export async function registerUser(payload: RegisterPayload) {
-  const { data } = await httpClient.post('/api/v1/auth/register', payload)
+  const { data } = await httpClient.post('/auth/register', payload)
   return data
 }
 
 export async function loginUser(identifier: string, password: string) {
-  const { data } = await httpClient.post<TokenResponse>('/api/v1/auth/login', { identifier, password })
+  const { data } = await httpClient.post<TokenResponse>('/auth/login', { identifier, password })
   return data
 }
