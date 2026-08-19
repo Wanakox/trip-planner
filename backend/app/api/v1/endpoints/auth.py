@@ -60,13 +60,13 @@ def register(
     except EmailAlreadyRegisteredError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Email already registered",
+            detail="Email ya registrado",
         ) from exc
 
     except UsernameAlreadyRegisteredError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Username already registered",
+            detail="Nombre de usuario ya registrado",
         ) from exc
 
 
@@ -90,7 +90,7 @@ def login(
     except InvalidCredentialsError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect identifier or password",
+            detail="Identificador o contraseña incorrectos",
             headers={
                 "WWW-Authenticate": "Bearer",
             },
@@ -119,7 +119,7 @@ def refresh_token(
     except jwt.InvalidTokenError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired refresh token",
+            detail="Token de refresco inválido o expirado",
         ) from exc
 
     return TokenResponse(

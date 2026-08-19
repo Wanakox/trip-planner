@@ -48,7 +48,7 @@ def get_currencies() -> list[CurrencyResponse]:
     except CurrencyProviderError as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Currency service is temporarily unavailable",
+            detail="El servicio de divisas no está disponible temporalmente",
         ) from exc
 
 
@@ -71,5 +71,5 @@ def convert_amount(
     except CurrencyProviderError as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Currency service is temporarily unavailable",
+            detail="El servicio de divisas no está disponible temporalmente",
         ) from exc
