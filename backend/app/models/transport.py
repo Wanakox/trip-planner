@@ -117,12 +117,6 @@ class Transport(Base):
         nullable=True,
     )
 
-    calendar_event_id: Mapped[str | None] = mapped_column(
-        "id_evento_calendario",
-        String(255),
-        nullable=True,
-    )
-
     trip: Mapped["Trip"] = relationship(
         back_populates="transports",
     )

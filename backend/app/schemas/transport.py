@@ -166,7 +166,6 @@ class TransportResponse(BaseModel):
     destination: str
 
     check_in_date: date | None = None
-    calendar_event_id: str | None = None
 
     model_config = ConfigDict(
         from_attributes=True,

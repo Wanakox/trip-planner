@@ -174,7 +174,6 @@ def add_accommodation_to_trip(
         check_out_date=accommodation_data.check_out_date,
         check_in_time=accommodation_data.check_in_time,
         check_out_time=accommodation_data.check_out_time,
-        calendar_event_id=None,
     )
 
     return create_accommodation(

@@ -190,7 +190,6 @@ def add_transport_to_trip(
         origin=transport_data.origin,
         destination=transport_data.destination,
         check_in_date=transport_data.check_in_date,
-        calendar_event_id=None,
     )
 
     return create_transport(

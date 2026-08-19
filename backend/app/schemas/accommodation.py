@@ -142,8 +142,6 @@ class AccommodationResponse(BaseModel):
     check_in_time: time | None = None
     check_out_time: time | None = None
 
-    calendar_event_id: str | None = None
-
     model_config = ConfigDict(
         from_attributes=True,
     )

@@ -46,7 +46,9 @@ export function LoginPage() {
         tokens.refresh_token,
       )
 
-      navigate('/')
+      navigate('/viajes', {
+        replace: true,
+      })
     },
   })
 
