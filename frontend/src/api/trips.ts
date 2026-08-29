@@ -311,6 +311,29 @@ export async function deleteNote(tripId: number, noteId: number): Promise<void> 
   await httpClient.delete(`/trips/${tripId}/notes/${noteId}`)
 }
 
+export async function getTripFiles(tripId: number): Promise<TripFile[]> {
+  const { data } = await httpClient.get<TripFile[]>(`/trips/${tripId}/files`)
+  return data
+}
+
+export async function uploadTripFiles(
+  tripId: number,
+  files: File[],
+): Promise<TripFile[]> {
+  const formData = new FormData()
+  files.forEach((file) => formData.append('files', file))
+  const { data } = await httpClient.post<TripFile[]>(
+    `/trips/${tripId}/files`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  )
+  return data
+}
+
+export async function deleteTripFile(tripId: number, fileId: number): Promise<void> {
+  await httpClient.delete(`/trips/${tripId}/files/${fileId}`)
+}
+
 export async function addParticipant(
   tripId: number,
   payload: ParticipantPayload,

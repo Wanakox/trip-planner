@@ -1,5 +1,4 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import DownloadIcon from '@mui/icons-material/Download'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
@@ -15,7 +14,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Paper,
   Rating,
   Stack,
   Typography,
@@ -37,6 +35,7 @@ import { ChecklistManager } from '../components/trips/ChecklistManager'
 import { ParticipantsManager } from '../components/trips/ParticipantsManager'
 import { ExpensesManager } from '../components/trips/ExpensesManager'
 import { NotesManager } from '../components/trips/NotesManager'
+import { DocumentsManager } from '../components/trips/DocumentsManager'
 import type { TripStatus } from '../types/trip'
 
 const statusConfig: Record<
@@ -55,39 +54,6 @@ function formatDate(value: string) {
     month: 'short',
     year: 'numeric',
   }).format(new Date(`${value}T00:00:00`))
-}
-
-function SectionCard({
-  title,
-  action,
-  children,
-}: {
-  title: string
-  action?: React.ReactNode
-  children: React.ReactNode
-}) {
-  return (
-    <Paper
-      variant="outlined"
-      sx={{ p: 2.25, borderRadius: '18px', borderColor: '#dce3ec' }}
-    >
-      <Stack
-        direction="row"
-        sx={{
-          mb: 1.5,
-          gap: 1,
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <Typography component="h2" sx={{ fontSize: 16, fontWeight: 800 }}>
-          {title}
-        </Typography>
-        {action}
-      </Stack>
-      {children}
-    </Paper>
-  )
 }
 
 export function TripDetailsPage() {
@@ -381,43 +347,11 @@ export function TripDetailsPage() {
                   initialNotes={data.notes}
                 />
 
-                <SectionCard
-                  title="Documentos y reservas"
-                  action={<Button size="small" sx={{ minHeight: 32 }}>+ Añadir</Button>}
-                >
-                  <Stack spacing={1}>
-                    {data.files.map((file) => (
-                      <Stack
-                        key={file.id}
-                        direction="row"
-                        spacing={1.25}
-                        sx={{
-                          p: 1,
-                          bgcolor: '#f7f9fc',
-                          borderRadius: '10px',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <DescriptionOutlinedIcon color="primary" />
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography noWrap sx={{ fontSize: 12, fontWeight: 700 }}>
-                            {file.name}.{file.extension}
-                          </Typography>
-                          <Typography sx={{ color: 'text.secondary', fontSize: 11 }}>
-                            {(file.size / 1024 / 1024).toFixed(1)} MB
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    ))}
-                    {!data.files.length && (
-                      <Typography sx={{ color: 'text.secondary', fontSize: 13 }}>
-                        {data.trip.status === 'completed'
-                          ? 'No hay documentos guardados.'
-                          : 'Los documentos estarán disponibles cuando el viaje esté completado.'}
-                      </Typography>
-                    )}
-                  </Stack>
-                </SectionCard>
+                <DocumentsManager
+                  tripId={data.trip.id}
+                  tripCompleted={data.trip.status === 'completed'}
+                  initialFiles={data.files}
+                />
               </Stack>
             </Box>
           </>

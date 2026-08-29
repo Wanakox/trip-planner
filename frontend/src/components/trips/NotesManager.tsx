@@ -56,7 +56,7 @@ export function NotesManager({
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<TripNote | null>(null)
   const [toDelete, setToDelete] = useState<TripNote | null>(null)
-  const [form, setForm] = useState<NotePayload>({ title: '', text: '', day_number: null })
+  const [form, setForm] = useState<NotePayload>({ title: '', text: '', day_number: 1 })
 
   const sync = (next: TripNote[]) => {
     const sorted = next.slice().sort((a, b) =>
@@ -90,13 +90,13 @@ export function NotesManager({
 
   const openCreate = () => {
     setEditing(null)
-    setForm({ title: '', text: '', day_number: null })
+    setForm({ title: '', text: '', day_number: 1 })
     saveMutation.reset()
     setFormOpen(true)
   }
   const openEdit = (note: TripNote) => {
     setEditing(note)
-    setForm({ title: note.title, text: note.text, day_number: note.day_number })
+    setForm({ title: note.title, text: note.text, day_number: note.day_number ?? 1 })
     saveMutation.reset()
     setFormOpen(true)
   }
@@ -137,8 +137,7 @@ export function NotesManager({
             <Stack spacing={2} sx={{ mt: 1 }}>
               <TextField label="Título" value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} required slotProps={{ htmlInput: { maxLength: 150 } }} />
               <TextField label="Texto" value={form.text} onChange={(event) => setForm((current) => ({ ...current, text: event.target.value }))} required multiline minRows={4} />
-              <TextField select label="Día del viaje (opcional)" value={form.day_number ?? ''} onChange={(event) => setForm((current) => ({ ...current, day_number: event.target.value === '' ? null : Number(event.target.value) }))}>
-                <MenuItem value="">Sin día concreto</MenuItem>
+              <TextField select required label="Día del viaje" value={form.day_number ?? 1} onChange={(event) => setForm((current) => ({ ...current, day_number: Number(event.target.value) }))}>
                 {Array.from({ length: totalDays }, (_, index) => index + 1).map((day) => <MenuItem key={day} value={day} disabled={notes.some((note) => note.day_number === day && note.id !== editing?.id)}>Día {day}</MenuItem>)}
               </TextField>
             </Stack>

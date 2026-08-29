@@ -231,7 +231,7 @@ export type TripNote = {
 export type NotePayload = {
   title: string
   text: string
-  day_number: number | null
+  day_number: number
 }
 
 export type TripDetails = {
