@@ -1,5 +1,4 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import BedOutlinedIcon from '@mui/icons-material/BedOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import DownloadIcon from '@mui/icons-material/Download'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
@@ -7,7 +6,6 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import StarOutlineIcon from '@mui/icons-material/StarOutlined'
 import {
   Alert,
-  Avatar,
   Box,
   Button,
   Checkbox,
@@ -36,6 +34,7 @@ import {
   rateTrip,
 } from '../api/trips'
 import { ActivitiesManager } from '../components/trips/ActivitiesManager'
+import { AccommodationsManager } from '../components/trips/AccommodationsManager'
 import { TransportsManager } from '../components/trips/TransportsManager'
 import type {
   TripExpense,
@@ -469,36 +468,13 @@ export function TripDetailsPage() {
                   initialTransports={data.transports}
                 />
 
-                <SectionCard title="Alojamiento">
-                  <Stack spacing={1.5}>
-                    {data.accommodations.map((accommodation) => (
-                      <Stack key={accommodation.id} direction="row" spacing={1.5}>
-                        <Avatar
-                          variant="rounded"
-                          sx={{ bgcolor: '#e2f7ef', color: 'secondary.main' }}
-                        >
-                          <BedOutlinedIcon />
-                        </Avatar>
-                        <Box>
-                          <Typography sx={{ fontSize: 13, fontWeight: 750 }}>
-                            {accommodation.name}
-                          </Typography>
-                          <Typography sx={{ color: 'text.secondary', fontSize: 12 }}>
-                            {accommodation.address}
-                          </Typography>
-                          <Typography sx={{ color: 'text.secondary', fontSize: 12 }}>
-                            Check-in: {formatDate(accommodation.check_in_date)} · Check-out: {formatDate(accommodation.check_out_date)}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    ))}
-                    {!data.accommodations.length && (
-                      <Typography sx={{ color: 'text.secondary', fontSize: 13 }}>
-                        No hay alojamientos registrados.
-                      </Typography>
-                    )}
-                  </Stack>
-                </SectionCard>
+                <AccommodationsManager
+                  tripId={data.trip.id}
+                  tripStartDate={data.trip.start_date}
+                  tripEndDate={data.trip.end_date}
+                  currency={data.trip.currency}
+                  initialAccommodations={data.accommodations}
+                />
 
                 <SectionCard
                   title="Documentos y reservas"

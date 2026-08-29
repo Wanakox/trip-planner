@@ -1,6 +1,7 @@
 import type {
   Trip,
   TripAccommodation,
+  AccommodationPayload,
   TripActivity,
   TripCreatePayload,
   TripDetails,
@@ -223,6 +224,47 @@ export async function deleteTransport(
 ): Promise<void> {
   await httpClient.delete(
     `/trips/${tripId}/transports/${transportId}`,
+  )
+}
+
+export async function getTripAccommodations(
+  tripId: number,
+): Promise<TripAccommodation[]> {
+  const { data } = await httpClient.get<TripAccommodation[]>(
+    `/trips/${tripId}/accommodations`,
+  )
+  return data
+}
+
+export async function addAccommodation(
+  tripId: number,
+  payload: AccommodationPayload,
+): Promise<TripAccommodation> {
+  const { data } = await httpClient.post<TripAccommodation>(
+    `/trips/${tripId}/accommodations`,
+    payload,
+  )
+  return data
+}
+
+export async function updateAccommodation(
+  tripId: number,
+  accommodationId: number,
+  payload: AccommodationPayload,
+): Promise<TripAccommodation> {
+  const { data } = await httpClient.patch<TripAccommodation>(
+    `/trips/${tripId}/accommodations/${accommodationId}`,
+    payload,
+  )
+  return data
+}
+
+export async function deleteAccommodation(
+  tripId: number,
+  accommodationId: number,
+): Promise<void> {
+  await httpClient.delete(
+    `/trips/${tripId}/accommodations/${accommodationId}`,
   )
 }
 

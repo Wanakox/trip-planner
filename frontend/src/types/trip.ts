@@ -158,6 +158,16 @@ export type TripAccommodation = {
   check_out_time: string | null
 }
 
+export type AccommodationPayload = {
+  name: string
+  address: string
+  price: number | null
+  check_in_date: string
+  check_out_date: string
+  check_in_time: string | null
+  check_out_time: string | null
+}
+
 export type TripFile = {
   id: number
   trip_id: number
