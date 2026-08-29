@@ -13,6 +13,7 @@ import type {
   ExpensePayload,
   ExpenseSummary,
   TripParticipant,
+  TripNote,
   TripFile,
   TripTask,
   TaskOrderPayload,
@@ -21,6 +22,7 @@ import type {
   TripUpdatePayload,
   TransportPayload,
   ParticipantPayload,
+  NotePayload,
 } from '../types/trip'
 import { httpClient } from './http'
 
@@ -283,6 +285,32 @@ export async function deleteExpense(tripId: number, expenseId: number): Promise<
   await httpClient.delete(`/trips/${tripId}/expenses/${expenseId}`)
 }
 
+export async function getTripNotes(tripId: number): Promise<TripNote[]> {
+  const { data } = await httpClient.get<TripNote[]>(`/trips/${tripId}/notes`)
+  return data
+}
+
+export async function addNote(tripId: number, payload: NotePayload): Promise<TripNote> {
+  const { data } = await httpClient.post<TripNote>(`/trips/${tripId}/notes`, payload)
+  return data
+}
+
+export async function updateNote(
+  tripId: number,
+  noteId: number,
+  payload: NotePayload,
+): Promise<TripNote> {
+  const { data } = await httpClient.patch<TripNote>(
+    `/trips/${tripId}/notes/${noteId}`,
+    payload,
+  )
+  return data
+}
+
+export async function deleteNote(tripId: number, noteId: number): Promise<void> {
+  await httpClient.delete(`/trips/${tripId}/notes/${noteId}`)
+}
+
 export async function addParticipant(
   tripId: number,
   payload: ParticipantPayload,
@@ -418,6 +446,7 @@ export async function getTripDetails(
     participants,
     transports,
     accommodations,
+    notes,
     files,
   ] = await Promise.all([
     getOptionalList<TripActivity>(
@@ -439,6 +468,9 @@ export async function getTripDetails(
       `${baseUrl}/accommodations`,
     ),
     trip.status === 'completed'
+      ? getOptionalList<TripNote>(`${baseUrl}/notes`)
+      : Promise.resolve([]),
+    trip.status === 'completed'
       ? getOptionalList<TripFile>(
           `${baseUrl}/files`,
         )
@@ -453,6 +485,7 @@ export async function getTripDetails(
     participants,
     transports,
     accommodations,
+    notes,
     files,
   }
 }

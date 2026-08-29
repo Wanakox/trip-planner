@@ -36,6 +36,7 @@ import { TransportsManager } from '../components/trips/TransportsManager'
 import { ChecklistManager } from '../components/trips/ChecklistManager'
 import { ParticipantsManager } from '../components/trips/ParticipantsManager'
 import { ExpensesManager } from '../components/trips/ExpensesManager'
+import { NotesManager } from '../components/trips/NotesManager'
 import type { TripStatus } from '../types/trip'
 
 const statusConfig: Record<
@@ -371,6 +372,13 @@ export function TripDetailsPage() {
                   tripEndDate={data.trip.end_date}
                   currency={data.trip.currency}
                   initialAccommodations={data.accommodations}
+                />
+
+                <NotesManager
+                  tripId={data.trip.id}
+                  totalDays={data.trip.total_days}
+                  tripCompleted={data.trip.status === 'completed'}
+                  initialNotes={data.notes}
                 />
 
                 <SectionCard

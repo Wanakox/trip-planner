@@ -220,6 +220,20 @@ export type TripFile = {
   size: number
 }
 
+export type TripNote = {
+  id: number
+  trip_id: number
+  title: string
+  text: string
+  day_number: number | null
+}
+
+export type NotePayload = {
+  title: string
+  text: string
+  day_number: number | null
+}
+
 export type TripDetails = {
   trip: Trip
   activities: TripActivity[]
@@ -228,5 +242,6 @@ export type TripDetails = {
   participants: TripParticipant[]
   transports: TripTransport[]
   accommodations: TripAccommodation[]
+  notes: TripNote[]
   files: TripFile[]
 }
