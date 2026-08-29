@@ -24,6 +24,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
 import { useState } from 'react'
 
 import {
@@ -77,6 +78,65 @@ function createEmptyForm(startDate: string): TransportPayload {
   }
 }
 
+type ApiErrorDetail = {
+  loc?: Array<string | number>
+  msg?: string
+}
+
+const fieldLabels: Record<string, string> = {
+  transport_type: 'tipo',
+  price: 'precio',
+  departure_date: 'fecha de salida',
+  arrival_date: 'fecha de llegada',
+  departure_time: 'hora de salida',
+  arrival_time: 'hora de llegada',
+  origin: 'origen',
+  destination: 'destino',
+  check_in_date: 'fecha de check-in',
+}
+
+function getSaveErrorMessage(error: unknown): string {
+  if (!axios.isAxiosError(error)) {
+    return 'No se ha podido guardar el transporte. Inténtalo de nuevo.'
+  }
+
+  if (!error.response) {
+    return 'No se puede conectar con el servidor. Comprueba la conexión e inténtalo de nuevo.'
+  }
+
+  if (error.response.status === 401) {
+    return 'Tu sesión ha caducado. Inicia sesión de nuevo para guardar el transporte.'
+  }
+
+  const detail = error.response.data?.detail
+
+  if (Array.isArray(detail)) {
+    const firstError = detail[0] as ApiErrorDetail | undefined
+    const field = firstError?.loc?.at(-1)
+    const label = typeof field === 'string' ? fieldLabels[field] : null
+
+    return label
+      ? `Revisa el campo «${label}»: ${firstError?.msg ?? 'el valor no es válido'}.`
+      : 'Hay datos no válidos en el formulario. Revisa los campos e inténtalo de nuevo.'
+  }
+
+  if (typeof detail === 'string') {
+    if (detail.includes('within the trip dates')) {
+      return 'Las fechas de salida y llegada deben estar dentro de las fechas del viaje.'
+    }
+    if (detail.includes('chronologically valid')) {
+      return 'Las fechas u horas no siguen un orden cronológico válido.'
+    }
+    if (detail === 'Trip not found') {
+      return 'El viaje ya no existe o no pertenece a tu cuenta.'
+    }
+
+    return detail
+  }
+
+  return 'No se ha podido guardar el transporte. Inténtalo de nuevo.'
+}
+
 export function TransportsManager({
   tripId,
   tripStartDate,
@@ -114,10 +174,10 @@ export function TransportsManager({
   }
 
   const saveMutation = useMutation({
-    mutationFn: () =>
+    mutationFn: (payload: TransportPayload) =>
       editingTransport
-        ? updateTransport(tripId, editingTransport.id, form)
-        : addTransport(tripId, form),
+        ? updateTransport(tripId, editingTransport.id, payload)
+        : addTransport(tripId, payload),
     onSuccess: async () => {
       await refreshTransports()
       setFormOpen(false)
@@ -162,6 +222,24 @@ export function TransportsManager({
     event.preventDefault()
     setValidationError(null)
 
+    const origin = form.origin.trim()
+    const destination = form.destination.trim()
+
+    if (!origin || !destination) {
+      setValidationError('El origen y el destino son obligatorios.')
+      return
+    }
+
+    if (
+      form.departure_date < tripStartDate ||
+      form.departure_date > tripEndDate ||
+      (form.arrival_date &&
+        (form.arrival_date < tripStartDate || form.arrival_date > tripEndDate))
+    ) {
+      setValidationError('Las fechas de salida y llegada deben estar dentro de las fechas del viaje.')
+      return
+    }
+
     if (form.arrival_date && form.arrival_date < form.departure_date) {
       setValidationError('La llegada no puede ser anterior a la salida.')
       return
@@ -180,7 +258,8 @@ export function TransportsManager({
       return
     }
 
-    saveMutation.mutate()
+    setForm((current) => ({ ...current, origin, destination }))
+    saveMutation.mutate({ ...form, origin, destination })
   }
 
   return (
@@ -249,7 +328,7 @@ export function TransportsManager({
           <DialogContent>
             {(validationError || saveMutation.isError) && (
               <Alert severity="error" sx={{ mb: 2 }}>
-                {validationError || 'No se ha podido guardar. Comprueba las fechas y los datos.'}
+                {validationError || getSaveErrorMessage(saveMutation.error)}
               </Alert>
             )}
             <Box sx={{ mt: 1, display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
@@ -306,7 +385,7 @@ export function TransportsManager({
                 type="date"
                 value={form.check_in_date ?? ''}
                 onChange={(event) => setForm((current) => ({ ...current, check_in_date: event.target.value || null }))}
-                slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: tripStartDate, max: form.departure_date } }}
+                slotProps={{ inputLabel: { shrink: true }, htmlInput: { max: form.departure_date } }}
               />
             </Box>
           </DialogContent>
