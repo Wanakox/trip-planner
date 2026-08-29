@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 
 import { DashboardLayout } from '../components/layout/DashboardLayout'
 import { CreateTripPage } from '../pages/CreateTripPage'
+import { EditTripPage } from '../pages/EditTripPage'
 import { FlightSearchPage } from '../pages/FlightSearchPage'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
@@ -44,6 +45,11 @@ export function AppRouter() {
           <Route
             element={<TripDetailsPage />}
             path="/viajes/:tripId"
+          />
+
+          <Route
+            element={<EditTripPage />}
+            path="/viajes/:tripId/editar"
           />
 
           <Route

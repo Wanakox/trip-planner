@@ -356,7 +356,12 @@ export function TripDetailsPage() {
                 >
                   {exporting ? 'Exportando...' : 'Exportar'}
                 </Button>
-                <Button variant="contained" startIcon={<EditOutlinedIcon />}>
+                <Button
+                  component={RouterLink}
+                  to={`/viajes/${data.trip.id}/editar`}
+                  variant="contained"
+                  startIcon={<EditOutlinedIcon />}
+                >
                   Editar viaje
                 </Button>
               </Stack>

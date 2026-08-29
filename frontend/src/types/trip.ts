@@ -44,6 +44,16 @@ export type TripCreatePayload = {
   destinations: DestinationCreatePayload[]
 }
 
+export type TripUpdatePayload = {
+  name: string
+  origin: string
+  description: string | null
+  start_date: string
+  end_date: string
+  budget: number
+  status: TripStatus
+}
+
 export type TripActivity = {
   id: number
   trip_id: number

@@ -8,6 +8,7 @@ import type {
   TripFile,
   TripTask,
   TripTransport,
+  TripUpdatePayload,
 } from '../types/trip'
 import { httpClient } from './http'
 
@@ -24,6 +25,28 @@ export async function createTrip(
   const { data } =
     await httpClient.post<Trip>(
       '/trips',
+      payload,
+    )
+
+  return data
+}
+
+export async function getTrip(
+  tripId: number,
+): Promise<Trip> {
+  const { data } =
+    await httpClient.get<Trip>(`/trips/${tripId}`)
+
+  return data
+}
+
+export async function updateTrip(
+  tripId: number,
+  payload: TripUpdatePayload,
+): Promise<Trip> {
+  const { data } =
+    await httpClient.patch<Trip>(
+      `/trips/${tripId}`,
       payload,
     )
 
