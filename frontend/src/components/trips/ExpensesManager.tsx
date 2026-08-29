@@ -31,6 +31,7 @@ import {
   getTripExpenses,
   updateExpense,
 } from '../../api/trips'
+import { getCurrencies } from '../../api/currency'
 import type {
   ExpensePayload,
   TripDetails,
@@ -103,6 +104,10 @@ export function ExpensesManager({
   const summaryQuery = useQuery({
     queryKey: ['expense-summary', tripId],
     queryFn: () => getExpenseSummary(tripId),
+  })
+  const currenciesQuery = useQuery({
+    queryKey: ['currencies'],
+    queryFn: getCurrencies,
   })
 
   const participantNames = useMemo(
@@ -246,7 +251,31 @@ export function ExpensesManager({
               <TextField label="Concepto" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} required slotProps={{ htmlInput: { maxLength: 150 } }} />
               <TextField select label="Participante" value={form.participant_id || ''} onChange={(event) => setForm((current) => ({ ...current, participant_id: Number(event.target.value) }))} required>{participants.map((participant) => <MenuItem key={participant.id} value={participant.id}>{participant.name}</MenuItem>)}</TextField>
               <TextField label="Cantidad" type="number" value={form.amount || ''} onChange={(event) => setForm((current) => ({ ...current, amount: Number(event.target.value) }))} required slotProps={{ htmlInput: { min: 0.01, step: 0.01 } }} />
-              <TextField label="Moneda" value={form.currency} onChange={(event) => setForm((current) => ({ ...current, currency: event.target.value.toUpperCase() }))} required slotProps={{ htmlInput: { maxLength: 3 } }} />
+              <TextField
+                select
+                label="Moneda"
+                value={form.currency}
+                onChange={(event) => setForm((current) => ({ ...current, currency: event.target.value }))}
+                required
+                disabled={currenciesQuery.isPending || currenciesQuery.isError}
+                error={currenciesQuery.isError}
+                helperText={
+                  currenciesQuery.isPending
+                    ? 'Cargando monedas…'
+                    : currenciesQuery.isError
+                      ? 'No se pudieron cargar las monedas.'
+                      : undefined
+                }
+              >
+                {form.currency && !(currenciesQuery.data ?? []).some((currency) => currency.code === form.currency) && (
+                  <MenuItem value={form.currency}>{form.currency}</MenuItem>
+                )}
+                {(currenciesQuery.data ?? []).map((currency) => (
+                  <MenuItem key={currency.code} value={currency.code}>
+                    {currency.code} — {currency.name}
+                  </MenuItem>
+                ))}
+              </TextField>
               <TextField select label="Categoría" value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value as TripExpense['category'] }))}>{Object.entries(categories).map(([value, label]) => <MenuItem key={value} value={value}>{label}</MenuItem>)}</TextField>
               <TextField label="Fecha" type="date" value={form.expense_date} onChange={(event) => setForm((current) => ({ ...current, expense_date: event.target.value }))} required slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: tripStartDate, max: tripEndDate } }} />
             </Box>
