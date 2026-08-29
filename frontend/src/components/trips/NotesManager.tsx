@@ -24,7 +24,7 @@ import axios from 'axios'
 import { useState } from 'react'
 
 import { addNote, deleteNote, getTripNotes, updateNote } from '../../api/trips'
-import type { NotePayload, TripDetails, TripNote } from '../../types/trip'
+import type { NotePayload, TripDetails, TripNote, TripStatus } from '../../types/trip'
 
 function errorMessage(error: unknown) {
   if (!axios.isAxiosError(error)) return 'No se ha podido guardar la nota.'
@@ -43,12 +43,14 @@ function errorMessage(error: unknown) {
 export function NotesManager({
   tripId,
   totalDays,
-  tripCompleted,
+  tripStatus,
+  tripStartDate,
   initialNotes,
 }: {
   tripId: number
   totalDays: number
-  tripCompleted: boolean
+  tripStatus: TripStatus
+  tripStartDate: string
   initialNotes: TripNote[]
 }) {
   const queryClient = useQueryClient()
@@ -57,6 +59,20 @@ export function NotesManager({
   const [editing, setEditing] = useState<TripNote | null>(null)
   const [toDelete, setToDelete] = useState<TripNote | null>(null)
   const [form, setForm] = useState<NotePayload>({ title: '', text: '', day_number: 1 })
+
+  const notesAvailable = tripStatus === 'in_progress' || tripStatus === 'completed'
+  const todayUtc = new Date()
+  const todayDate = Date.UTC(
+    todayUtc.getUTCFullYear(),
+    todayUtc.getUTCMonth(),
+    todayUtc.getUTCDate(),
+  )
+  const [startYear, startMonth, startDay] = tripStartDate.split('-').map(Number)
+  const startDate = Date.UTC(startYear, startMonth - 1, startDay)
+  const currentDay = Math.floor((todayDate - startDate) / 86_400_000) + 1
+  const maxAvailableDay = tripStatus === 'completed'
+    ? totalDays
+    : Math.max(0, Math.min(currentDay, totalDays))
 
   const sync = (next: TripNote[]) => {
     const sorted = next.slice().sort((a, b) =>
@@ -89,8 +105,12 @@ export function NotesManager({
   })
 
   const openCreate = () => {
+    const firstAvailableDay = Array.from(
+      { length: maxAvailableDay },
+      (_, index) => index + 1,
+    ).find((day) => !notes.some((note) => note.day_number === day)) ?? 1
     setEditing(null)
-    setForm({ title: '', text: '', day_number: 1 })
+    setForm({ title: '', text: '', day_number: firstAvailableDay })
     saveMutation.reset()
     setFormOpen(true)
   }
@@ -105,13 +125,14 @@ export function NotesManager({
     <Paper variant="outlined" sx={{ p: 2.25, borderRadius: '18px', borderColor: '#dce3ec' }}>
       <Stack direction="row" sx={{ mb: 1.5, gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography component="h2" sx={{ fontSize: 16, fontWeight: 800 }}>Notas</Typography>
-        <Button size="small" startIcon={<AddIcon />} onClick={openCreate} disabled={!tripCompleted || notes.length >= totalDays} sx={{ minHeight: 32 }}>Añadir</Button>
+        <Button size="small" startIcon={<AddIcon />} onClick={openCreate} disabled={!notesAvailable || maxAvailableDay === 0 || notes.length >= maxAvailableDay} sx={{ minHeight: 32 }}>Añadir</Button>
       </Stack>
 
-      {!tripCompleted && <Alert severity="info">Las notas estarán disponibles cuando el viaje esté completado.</Alert>}
+      {!notesAvailable && <Alert severity="info">Las notas estarán disponibles cuando el viaje comience.</Alert>}
+      {tripStatus === 'in_progress' && <Alert severity="info" sx={{ mb: 2 }}>Puedes crear notas para los días 1 a {maxAvailableDay} del viaje.</Alert>}
       {deleteMutation.isError && <Alert severity="error" sx={{ mb: 2 }}>No se ha podido eliminar la nota.</Alert>}
 
-      {tripCompleted && <Stack spacing={1.25}>
+      {notesAvailable && <Stack spacing={1.25}>
         {notes.map((note) => (
           <Stack key={note.id} direction="row" spacing={1} sx={{ p: 1.25, alignItems: 'flex-start', bgcolor: '#fffbea', borderRadius: '12px' }}>
             <NotesOutlinedIcon sx={{ mt: 0.25, color: 'warning.dark' }} />
@@ -138,7 +159,7 @@ export function NotesManager({
               <TextField label="Título" value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} required slotProps={{ htmlInput: { maxLength: 150 } }} />
               <TextField label="Texto" value={form.text} onChange={(event) => setForm((current) => ({ ...current, text: event.target.value }))} required multiline minRows={4} />
               <TextField select required label="Día del viaje" value={form.day_number ?? 1} onChange={(event) => setForm((current) => ({ ...current, day_number: Number(event.target.value) }))}>
-                {Array.from({ length: totalDays }, (_, index) => index + 1).map((day) => <MenuItem key={day} value={day} disabled={notes.some((note) => note.day_number === day && note.id !== editing?.id)}>Día {day}</MenuItem>)}
+                {Array.from({ length: totalDays }, (_, index) => index + 1).map((day) => <MenuItem key={day} value={day} disabled={day > maxAvailableDay || notes.some((note) => note.day_number === day && note.id !== editing?.id)}>Día {day}{day > maxAvailableDay ? ' (aún no disponible)' : ''}</MenuItem>)}
               </TextField>
             </Stack>
           </DialogContent>

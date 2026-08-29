@@ -343,7 +343,8 @@ export function TripDetailsPage() {
                 <NotesManager
                   tripId={data.trip.id}
                   totalDays={data.trip.total_days}
-                  tripCompleted={data.trip.status === 'completed'}
+                  tripStatus={data.trip.status}
+                  tripStartDate={data.trip.start_date}
                   initialNotes={data.notes}
                 />
 

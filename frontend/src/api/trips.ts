@@ -490,7 +490,7 @@ export async function getTripDetails(
     getOptionalList<TripAccommodation>(
       `${baseUrl}/accommodations`,
     ),
-    trip.status === 'completed'
+    trip.status === 'completed' || trip.status === 'in_progress'
       ? getOptionalList<TripNote>(`${baseUrl}/notes`)
       : Promise.resolve([]),
     trip.status === 'completed'

@@ -253,6 +253,12 @@ class NoteDayAlreadyExistsError(TripPlannerError):
     default_message = "Ya existe una nota asociada al día indicado del viaje."
 
 
+class NotesUnavailableError(TripPlannerError):
+    """Las notas no están disponibles para el estado actual del viaje."""
+
+    default_message = "Las notas solo están disponibles durante o después del viaje."
+
+
 # ============================================================
 # ARCHIVOS
 # ============================================================
