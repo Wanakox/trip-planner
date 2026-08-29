@@ -339,7 +339,7 @@ export function TripDetailsPage() {
                     {data.trip.destinations
                       .slice()
                       .sort((a, b) => a.order - b.order)
-                      .map((destination) => destination.city)
+                      .map((destination) => `${destination.city}, ${destination.country}`)
                       .join(' · ')}
                   </Typography>
                   <Typography>•</Typography>

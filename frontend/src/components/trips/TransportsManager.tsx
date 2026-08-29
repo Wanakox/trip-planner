@@ -293,6 +293,11 @@ export function TransportsManager({
                 {transport.arrival_date ? ` — ${formatDate(transport.arrival_date)}` : ''}
                 {transport.arrival_time ? ` · ${transport.arrival_time.slice(0, 5)}` : ''}
               </Typography>
+              {transport.check_in_date && (
+                <Typography sx={{ mt: 0.3, color: 'text.secondary', fontSize: 12 }}>
+                  Check-in: {formatDate(transport.check_in_date)}
+                </Typography>
+              )}
               {transport.price !== null && (
                 <Typography sx={{ mt: 0.3, color: 'text.secondary', fontSize: 12 }}>
                   {new Intl.NumberFormat('es-ES', { style: 'currency', currency }).format(Number(transport.price))}
