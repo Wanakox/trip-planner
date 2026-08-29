@@ -1,7 +1,13 @@
 import type {
   Trip,
+  TripAccommodation,
+  TripActivity,
   TripCreatePayload,
   TripDetails,
+  TripExpense,
+  TripFile,
+  TripTask,
+  TripTransport,
 } from '../types/trip'
 import { httpClient } from './http'
 
@@ -28,9 +34,22 @@ export async function getTripDetails(
   tripId: number,
 ): Promise<TripDetails> {
   const baseUrl = `/trips/${tripId}`
+  const { data: trip } =
+    await httpClient.get<Trip>(baseUrl)
+
+  async function getOptionalList<T>(
+    url: string,
+  ): Promise<T[]> {
+    try {
+      const { data } =
+        await httpClient.get<T[]>(url)
+      return data
+    } catch {
+      return []
+    }
+  }
 
   const [
-    trip,
     activities,
     tasks,
     expenses,
@@ -38,23 +57,36 @@ export async function getTripDetails(
     accommodations,
     files,
   ] = await Promise.all([
-    httpClient.get(`${baseUrl}`),
-    httpClient.get(`${baseUrl}/activities`),
-    httpClient.get(`${baseUrl}/checklist`),
-    httpClient.get(`${baseUrl}/expenses`),
-    httpClient.get(`${baseUrl}/transports`),
-    httpClient.get(`${baseUrl}/accommodations`),
-    httpClient.get(`${baseUrl}/files`),
+    getOptionalList<TripActivity>(
+      `${baseUrl}/activities`,
+    ),
+    getOptionalList<TripTask>(
+      `${baseUrl}/checklist`,
+    ),
+    getOptionalList<TripExpense>(
+      `${baseUrl}/expenses`,
+    ),
+    getOptionalList<TripTransport>(
+      `${baseUrl}/transports`,
+    ),
+    getOptionalList<TripAccommodation>(
+      `${baseUrl}/accommodations`,
+    ),
+    trip.status === 'completed'
+      ? getOptionalList<TripFile>(
+          `${baseUrl}/files`,
+        )
+      : Promise.resolve([]),
   ])
 
   return {
-    trip: trip.data,
-    activities: activities.data,
-    tasks: tasks.data,
-    expenses: expenses.data,
-    transports: transports.data,
-    accommodations: accommodations.data,
-    files: files.data,
+    trip,
+    activities,
+    tasks,
+    expenses,
+    transports,
+    accommodations,
+    files,
   }
 }
 

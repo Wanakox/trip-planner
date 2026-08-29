@@ -548,7 +548,9 @@ export function TripDetailsPage() {
                     ))}
                     {!data.files.length && (
                       <Typography sx={{ color: 'text.secondary', fontSize: 13 }}>
-                        No hay documentos guardados.
+                        {data.trip.status === 'completed'
+                          ? 'No hay documentos guardados.'
+                          : 'Los documentos estarán disponibles cuando el viaje esté completado.'}
                       </Typography>
                     )}
                   </Stack>
