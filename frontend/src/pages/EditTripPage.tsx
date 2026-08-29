@@ -17,6 +17,7 @@ import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 
 import { getTrip, updateTrip } from '../api/trips'
 import { getCurrencies } from '../api/currency'
+import { DestinationsManager } from '../components/trips/DestinationsManager'
 import type { TripStatus, TripUpdatePayload } from '../types/trip'
 
 type EditTripForm = {
@@ -190,6 +191,7 @@ export function EditTripPage() {
         )}
 
         {tripQuery.data && (
+          <>
           <Paper
             component="form"
             variant="outlined"
@@ -311,10 +313,6 @@ export function EditTripPage() {
               />
             </Box>
 
-            <Alert severity="info" sx={{ mt: 3 }}>
-              Los destinos se gestionarán desde su apartado específico para conservar su orden y moneda.
-            </Alert>
-
             <Stack
               direction={{ xs: 'column-reverse', sm: 'row' }}
               spacing={2}
@@ -341,6 +339,12 @@ export function EditTripPage() {
               </Button>
             </Stack>
           </Paper>
+          <DestinationsManager
+            tripId={numericTripId}
+            initialDestinations={tripQuery.data.destinations}
+            currencies={currenciesQuery.data ?? []}
+          />
+          </>
         )}
       </Box>
     </Box>

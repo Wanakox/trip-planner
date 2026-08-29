@@ -4,6 +4,8 @@ import type {
   TripActivity,
   TripCreatePayload,
   TripDetails,
+  DestinationCreatePayload,
+  DestinationOrderPayload,
   TripExpense,
   TripFile,
   TripTask,
@@ -70,6 +72,50 @@ export async function deleteTrip(
   tripId: number,
 ): Promise<void> {
   await httpClient.delete(`/trips/${tripId}`)
+}
+
+export async function addDestination(
+  tripId: number,
+  payload: DestinationCreatePayload,
+): Promise<Trip> {
+  const { data } = await httpClient.post<Trip>(
+    `/trips/${tripId}/destinations`,
+    payload,
+  )
+  return data
+}
+
+export async function updateDestination(
+  tripId: number,
+  destinationId: number,
+  payload: DestinationCreatePayload,
+): Promise<Trip> {
+  const { data } = await httpClient.patch<Trip>(
+    `/trips/${tripId}/destinations/${destinationId}`,
+    payload,
+  )
+  return data
+}
+
+export async function deleteDestination(
+  tripId: number,
+  destinationId: number,
+): Promise<Trip> {
+  const { data } = await httpClient.delete<Trip>(
+    `/trips/${tripId}/destinations/${destinationId}`,
+  )
+  return data
+}
+
+export async function reorderDestinations(
+  tripId: number,
+  payload: DestinationOrderPayload,
+): Promise<Trip> {
+  const { data } = await httpClient.put<Trip>(
+    `/trips/${tripId}/destinations/order`,
+    payload,
+  )
+  return data
 }
 
 export async function getTripDetails(

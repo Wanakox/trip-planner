@@ -34,6 +34,13 @@ export type DestinationCreatePayload = {
   currency: string
 }
 
+export type DestinationOrderPayload = {
+  destinations: Array<{
+    id: number
+    order: number
+  }>
+}
+
 export type TripCreatePayload = {
   name: string
   origin: string
