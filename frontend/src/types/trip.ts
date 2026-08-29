@@ -73,6 +73,21 @@ export type TripActivity = {
   order: number
 }
 
+export type ActivityPayload = {
+  name: string
+  location: string | null
+  start_time: string | null
+  day_number: number
+}
+
+export type ActivityOrderPayload = {
+  activities: Array<{
+    id: number
+    day_number: number
+    order: number
+  }>
+}
+
 export type TripTask = {
   id: number
   trip_id: number

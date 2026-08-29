@@ -6,6 +6,8 @@ import type {
   TripDetails,
   DestinationCreatePayload,
   DestinationOrderPayload,
+  ActivityOrderPayload,
+  ActivityPayload,
   TripExpense,
   TripFile,
   TripTask,
@@ -113,6 +115,70 @@ export async function reorderDestinations(
 ): Promise<Trip> {
   const { data } = await httpClient.put<Trip>(
     `/trips/${tripId}/destinations/order`,
+    payload,
+  )
+  return data
+}
+
+export async function addActivity(
+  tripId: number,
+  payload: ActivityPayload,
+): Promise<TripActivity> {
+  const { data } = await httpClient.post<TripActivity>(
+    `/trips/${tripId}/activities`,
+    payload,
+  )
+  return data
+}
+
+export async function getTripActivities(
+  tripId: number,
+): Promise<TripActivity[]> {
+  const { data } = await httpClient.get<TripActivity[]>(
+    `/trips/${tripId}/activities`,
+  )
+  return data
+}
+
+export async function updateActivity(
+  tripId: number,
+  activityId: number,
+  payload: ActivityPayload,
+): Promise<TripActivity> {
+  const { data } = await httpClient.patch<TripActivity>(
+    `/trips/${tripId}/activities/${activityId}`,
+    payload,
+  )
+  return data
+}
+
+export async function deleteActivity(
+  tripId: number,
+  activityId: number,
+): Promise<void> {
+  await httpClient.delete(
+    `/trips/${tripId}/activities/${activityId}`,
+  )
+}
+
+export async function setActivityCompleted(
+  tripId: number,
+  activityId: number,
+  completed: boolean,
+): Promise<TripActivity> {
+  const { data } = await httpClient.put<TripActivity>(
+    `/trips/${tripId}/activities/${activityId}/completed`,
+    { completed },
+  )
+  return data
+}
+
+export async function reorderActivities(
+  tripId: number,
+  payload: ActivityOrderPayload,
+): Promise<TripActivity[]> {
+  const { data } = await httpClient.put<TripActivity[]>(
+    `/trips/${tripId}/activities/order`,
     payload,
   )
   return data

@@ -1,4 +1,3 @@
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import BedOutlinedIcon from '@mui/icons-material/BedOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
@@ -6,9 +5,7 @@ import DirectionsBusOutlinedIcon from '@mui/icons-material/DirectionsBusOutlined
 import DownloadIcon from '@mui/icons-material/Download'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
-import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined'
 import FlightOutlinedIcon from '@mui/icons-material/FlightOutlined'
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
 import StarOutlineIcon from '@mui/icons-material/StarOutlined'
 import {
   Alert,
@@ -40,8 +37,8 @@ import {
   getTripDetails,
   rateTrip,
 } from '../api/trips'
+import { ActivitiesManager } from '../components/trips/ActivitiesManager'
 import type {
-  TripActivity,
   TripExpense,
   TripStatus,
 } from '../types/trip'
@@ -109,52 +106,6 @@ function SectionCard({
         {action}
       </Stack>
       {children}
-    </Paper>
-  )
-}
-
-function ActivityCard({ activity }: { activity: TripActivity }) {
-  return (
-    <Paper
-      variant="outlined"
-      sx={{ p: 2, borderRadius: '16px', borderColor: '#dce3ec' }}
-    >
-      <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        sx={{ gap: 1, alignItems: { sm: 'center' } }}
-      >
-        <Chip
-          label={`DÍA ${activity.day_number}`}
-          size="small"
-          color="primary"
-          sx={{ alignSelf: 'flex-start', fontSize: 10, fontWeight: 800 }}
-        />
-        <Typography sx={{ flex: 1, fontWeight: 750 }}>
-          {activity.name}
-        </Typography>
-        {activity.start_time && (
-          <Stack
-            direction="row"
-            spacing={0.5}
-            sx={{ alignItems: 'center', color: 'text.secondary' }}
-          >
-            <AccessTimeIcon sx={{ fontSize: 16 }} />
-            <Typography sx={{ fontSize: 12 }}>
-              {activity.start_time.slice(0, 5)}
-            </Typography>
-          </Stack>
-        )}
-      </Stack>
-      {activity.location && (
-        <Stack
-          direction="row"
-          spacing={0.5}
-          sx={{ mt: 1, alignItems: 'center', color: 'text.secondary' }}
-        >
-          <LocationOnOutlinedIcon sx={{ fontSize: 16 }} />
-          <Typography sx={{ fontSize: 13 }}>{activity.location}</Typography>
-        </Stack>
-      )}
     </Paper>
   )
 }
@@ -470,30 +421,11 @@ export function TripDetailsPage() {
                 alignItems: 'start',
               }}
             >
-              <Box>
-                <Typography
-                  component="h2"
-                  sx={{ mb: 1.5, fontSize: 19, fontWeight: 850 }}
-                >
-                  Itinerario diario
-                </Typography>
-                <Stack spacing={1.5}>
-                  {data.activities
-                    .slice()
-                    .sort((a, b) => a.day_number - b.day_number || a.order - b.order)
-                    .map((activity) => (
-                      <ActivityCard key={activity.id} activity={activity} />
-                    ))}
-                  {!data.activities.length && (
-                    <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
-                      <EventNoteOutlinedIcon color="disabled" />
-                      <Typography sx={{ color: 'text.secondary' }}>
-                        Aún no hay actividades en este viaje.
-                      </Typography>
-                    </Paper>
-                  )}
-                </Stack>
-              </Box>
+              <ActivitiesManager
+                tripId={data.trip.id}
+                totalDays={data.trip.total_days}
+                initialActivities={data.activities}
+              />
 
               <Stack spacing={2}>
                 <SectionCard title="Tareas pendientes">
