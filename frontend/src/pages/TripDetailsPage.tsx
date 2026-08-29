@@ -8,7 +8,6 @@ import {
   Alert,
   Box,
   Button,
-  Checkbox,
   Chip,
   CircularProgress,
   Divider,
@@ -36,6 +35,7 @@ import {
 import { ActivitiesManager } from '../components/trips/ActivitiesManager'
 import { AccommodationsManager } from '../components/trips/AccommodationsManager'
 import { TransportsManager } from '../components/trips/TransportsManager'
+import { ChecklistManager } from '../components/trips/ChecklistManager'
 import type {
   TripExpense,
   TripStatus,
@@ -426,33 +426,10 @@ export function TripDetailsPage() {
               />
 
               <Stack spacing={2}>
-                <SectionCard title="Tareas pendientes">
-                  <Stack spacing={0.25}>
-                    {data.tasks.map((task) => (
-                      <Stack
-                        key={task.id}
-                        direction="row"
-                        sx={{ alignItems: 'center' }}
-                      >
-                        <Checkbox size="small" checked={task.completed} disabled />
-                        <Typography
-                          sx={{
-                            fontSize: 13,
-                            color: task.completed ? 'text.secondary' : 'text.primary',
-                            textDecoration: task.completed ? 'line-through' : 'none',
-                          }}
-                        >
-                          {task.name}
-                        </Typography>
-                      </Stack>
-                    ))}
-                    {!data.tasks.length && (
-                      <Typography sx={{ color: 'text.secondary', fontSize: 13 }}>
-                        No hay tareas pendientes.
-                      </Typography>
-                    )}
-                  </Stack>
-                </SectionCard>
+                <ChecklistManager
+                  tripId={data.trip.id}
+                  initialTasks={data.tasks}
+                />
 
                 <ExpensesCard
                   expenses={data.expenses}

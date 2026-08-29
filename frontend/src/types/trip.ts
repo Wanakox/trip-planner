@@ -97,6 +97,18 @@ export type TripTask = {
   order: number
 }
 
+export type TaskPayload = {
+  name: string
+  priority: TripTask['priority']
+}
+
+export type TaskOrderPayload = {
+  tasks: Array<{
+    id: number
+    order: number
+  }>
+}
+
 export type TripExpense = {
   id: number
   trip_id: number
