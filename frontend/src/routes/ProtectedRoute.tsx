@@ -4,13 +4,17 @@ import {
   useLocation,
 } from 'react-router-dom'
 
+import {
+  clearStoredSession,
+  hasValidAccessToken,
+} from '../utils/authSession'
+
 export function ProtectedRoute() {
   const location = useLocation()
 
-  const accessToken =
-    localStorage.getItem('access_token')
+  if (!hasValidAccessToken()) {
+    clearStoredSession()
 
-  if (!accessToken) {
     return (
       <Navigate
         to="/iniciar-sesion"
