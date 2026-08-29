@@ -63,6 +63,25 @@ const emptyForm: ActivityPayload = {
   day_number: 1,
 }
 
+function normalizeOrders(activities: TripActivity[]) {
+  const nextOrderByDay = new Map<number, number>()
+
+  return activities
+    .slice()
+    .sort(
+      (first, second) =>
+        first.day_number - second.day_number ||
+        first.order - second.order,
+    )
+    .map((activity) => {
+      const nextOrder =
+        (nextOrderByDay.get(activity.day_number) ?? 0) + 1
+      nextOrderByDay.set(activity.day_number, nextOrder)
+
+      return { ...activity, order: nextOrder }
+    })
+}
+
 function SortableActivity({
   activity,
   busy,
@@ -236,7 +255,7 @@ export function ActivitiesManager({
   const reorderMutation = useMutation({
     mutationFn: (nextActivities: TripActivity[]) =>
       reorderActivities(tripId, {
-        activities: nextActivities.map((activity) => ({
+        activities: normalizeOrders(nextActivities).map((activity) => ({
           id: activity.id,
           day_number: activity.day_number,
           order: activity.order,
@@ -288,9 +307,9 @@ export function ActivitiesManager({
       (activity, index) => ({ ...activity, order: index + 1 }),
     )
     const reorderedIds = new Set(reorderedDay.map((activity) => activity.id))
-    const nextActivities = activities
+    const nextActivities = normalizeOrders(activities
       .filter((activity) => !reorderedIds.has(activity.id))
-      .concat(reorderedDay)
+      .concat(reorderedDay))
     syncActivities(nextActivities)
     reorderMutation.mutate(nextActivities)
   }
