@@ -3,7 +3,6 @@ import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
 import {
   Box,
-  Button,
   Paper,
   Stack,
   Typography,
@@ -118,6 +117,9 @@ export function TripCard({
 
   return (
     <Paper
+      component={RouterLink}
+      to={`/viajes/${trip.id}`}
+      aria-label={`Ver detalles de ${trip.name}`}
       variant="outlined"
       sx={{
         height: '100%',
@@ -128,6 +130,9 @@ export function TripCard({
         borderRadius: '22px',
         borderColor: '#dce3ec',
         bgcolor: 'background.paper',
+        color: 'text.primary',
+        textDecoration: 'none',
+        cursor: 'pointer',
         boxShadow: '0 10px 30px rgba(15, 23, 42, 0.06)',
         transition:
           'transform 180ms ease, box-shadow 180ms ease',
@@ -135,6 +140,11 @@ export function TripCard({
           transform: 'translateY(-4px)',
           boxShadow:
             '0 18px 42px rgba(15, 23, 42, 0.11)',
+        },
+        '&:focus-visible': {
+          outline: '3px solid',
+          outlineColor: 'primary.main',
+          outlineOffset: 3,
         },
       }}
     >
@@ -156,7 +166,7 @@ export function TripCard({
             width: 155,
             height: 155,
             borderRadius: '50%',
-            bgcolor: 'rgba(255,255,255,0.09)',
+            bgcolor: 'rgba(255,255,255,0.14)',
             top: -70,
             right: -30,
           }}
@@ -170,7 +180,7 @@ export function TripCard({
             height: 72,
             borderRadius: '50%',
             border:
-              '1px solid rgba(255,255,255,0.18)',
+              '2px solid rgba(255,255,255,0.28)',
             right: 70,
             bottom: -38,
           }}
@@ -424,20 +434,17 @@ export function TripCard({
           </Box>
         </Box>
 
-        <Button
-          component={RouterLink}
-          to={`/viajes/${trip.id}`}
-          endIcon={
-            <ArrowForwardIcon
-              className="trip-arrow"
-              fontSize="small"
-            />
-          }
-          disableElevation
+        <Box
+          component="span"
           sx={{
             mt: 'auto',
-            pt: 2,
             minHeight: 46,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1,
+            px: 2,
+            py: 1.25,
             borderRadius: '12px',
             bgcolor: status.lightColor,
             color: status.color,
@@ -456,7 +463,11 @@ export function TripCard({
           }}
         >
           Ver viaje
-        </Button>
+          <ArrowForwardIcon
+            className="trip-arrow"
+            fontSize="small"
+          />
+        </Box>
       </Box>
     </Paper>
   )
