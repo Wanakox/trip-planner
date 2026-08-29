@@ -126,6 +126,16 @@ export type TripExpense = {
   expense_date: string
 }
 
+export type TripParticipant = {
+  id: number
+  trip_id: number
+  name: string
+}
+
+export type ParticipantPayload = {
+  name: string
+}
+
 export type TripTransport = {
   id: number
   trip_id: number
@@ -193,6 +203,7 @@ export type TripDetails = {
   activities: TripActivity[]
   tasks: TripTask[]
   expenses: TripExpense[]
+  participants: TripParticipant[]
   transports: TripTransport[]
   accommodations: TripAccommodation[]
   files: TripFile[]

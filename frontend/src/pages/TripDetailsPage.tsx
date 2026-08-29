@@ -36,6 +36,7 @@ import { ActivitiesManager } from '../components/trips/ActivitiesManager'
 import { AccommodationsManager } from '../components/trips/AccommodationsManager'
 import { TransportsManager } from '../components/trips/TransportsManager'
 import { ChecklistManager } from '../components/trips/ChecklistManager'
+import { ParticipantsManager } from '../components/trips/ParticipantsManager'
 import type {
   TripExpense,
   TripStatus,
@@ -435,6 +436,13 @@ export function TripDetailsPage() {
                   expenses={data.expenses}
                   budget={Number(data.trip.budget)}
                   currency={data.trip.currency}
+                />
+
+                <ParticipantsManager
+                  tripId={data.trip.id}
+                  currency={data.trip.currency}
+                  expenses={data.expenses}
+                  initialParticipants={data.participants}
                 />
 
                 <TransportsManager

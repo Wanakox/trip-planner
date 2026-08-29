@@ -10,6 +10,7 @@ import type {
   ActivityOrderPayload,
   ActivityPayload,
   TripExpense,
+  TripParticipant,
   TripFile,
   TripTask,
   TaskOrderPayload,
@@ -17,6 +18,7 @@ import type {
   TripTransport,
   TripUpdatePayload,
   TransportPayload,
+  ParticipantPayload,
 } from '../types/trip'
 import { httpClient } from './http'
 
@@ -240,6 +242,38 @@ export async function reorderTasks(
   return data
 }
 
+export async function getTripParticipants(tripId: number): Promise<TripParticipant[]> {
+  const { data } = await httpClient.get<TripParticipant[]>(`/trips/${tripId}/participants`)
+  return data
+}
+
+export async function addParticipant(
+  tripId: number,
+  payload: ParticipantPayload,
+): Promise<TripParticipant> {
+  const { data } = await httpClient.post<TripParticipant>(`/trips/${tripId}/participants`, payload)
+  return data
+}
+
+export async function updateParticipant(
+  tripId: number,
+  participantId: number,
+  payload: ParticipantPayload,
+): Promise<TripParticipant> {
+  const { data } = await httpClient.patch<TripParticipant>(
+    `/trips/${tripId}/participants/${participantId}`,
+    payload,
+  )
+  return data
+}
+
+export async function deleteParticipant(
+  tripId: number,
+  participantId: number,
+): Promise<void> {
+  await httpClient.delete(`/trips/${tripId}/participants/${participantId}`)
+}
+
 export async function getTripTransports(
   tripId: number,
 ): Promise<TripTransport[]> {
@@ -345,6 +379,7 @@ export async function getTripDetails(
     activities,
     tasks,
     expenses,
+    participants,
     transports,
     accommodations,
     files,
@@ -357,6 +392,9 @@ export async function getTripDetails(
     ),
     getOptionalList<TripExpense>(
       `${baseUrl}/expenses`,
+    ),
+    getOptionalList<TripParticipant>(
+      `${baseUrl}/participants`,
     ),
     getOptionalList<TripTransport>(
       `${baseUrl}/transports`,
@@ -376,6 +414,7 @@ export async function getTripDetails(
     activities,
     tasks,
     expenses,
+    participants,
     transports,
     accommodations,
     files,
