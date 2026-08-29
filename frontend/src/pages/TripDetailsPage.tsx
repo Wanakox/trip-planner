@@ -10,20 +10,18 @@ import {
   Button,
   Chip,
   CircularProgress,
-  Divider,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  LinearProgress,
   Paper,
   Rating,
   Stack,
   Typography,
 } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 
 import {
@@ -37,10 +35,8 @@ import { AccommodationsManager } from '../components/trips/AccommodationsManager
 import { TransportsManager } from '../components/trips/TransportsManager'
 import { ChecklistManager } from '../components/trips/ChecklistManager'
 import { ParticipantsManager } from '../components/trips/ParticipantsManager'
-import type {
-  TripExpense,
-  TripStatus,
-} from '../types/trip'
+import { ExpensesManager } from '../components/trips/ExpensesManager'
+import type { TripStatus } from '../types/trip'
 
 const statusConfig: Record<
   TripStatus,
@@ -52,28 +48,12 @@ const statusConfig: Record<
   cancelled: { label: 'Cancelado', color: 'error' },
 }
 
-const categoryLabels: Record<string, string> = {
-  accommodation: 'Alojamiento',
-  transport: 'Transporte',
-  food: 'Comidas',
-  leisure: 'Ocio',
-  shopping: 'Compras',
-  other: 'Varios',
-}
-
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('es-ES', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
   }).format(new Date(`${value}T00:00:00`))
-}
-
-function formatMoney(value: number, currency: string) {
-  return new Intl.NumberFormat('es-ES', {
-    style: 'currency',
-    currency,
-  }).format(value)
 }
 
 function SectionCard({
@@ -106,78 +86,6 @@ function SectionCard({
       </Stack>
       {children}
     </Paper>
-  )
-}
-
-function ExpensesCard({
-  expenses,
-  budget,
-  currency,
-}: {
-  expenses: TripExpense[]
-  budget: number
-  currency: string
-}) {
-  const categories = useMemo(
-    () =>
-      expenses.reduce<Record<string, number>>((result, expense) => {
-        result[expense.category] =
-          (result[expense.category] ?? 0) + Number(expense.amount)
-        return result
-      }, {}),
-    [expenses],
-  )
-  const total = Object.values(categories).reduce(
-    (sum, amount) => sum + amount,
-    0,
-  )
-
-  return (
-    <SectionCard
-      title="Gastos detallados"
-      action={
-        <Chip
-          size="small"
-          color="primary"
-          variant="outlined"
-          label={`Presupuesto: ${formatMoney(budget, currency)}`}
-        />
-      }
-    >
-      <Stack spacing={1.5}>
-        {Object.entries(categories).map(([category, amount]) => (
-          <Box key={category}>
-            <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-              <Typography sx={{ fontSize: 13 }}>
-                {categoryLabels[category] ?? category}
-              </Typography>
-              <Typography sx={{ fontSize: 13, fontWeight: 700 }}>
-                {formatMoney(amount, currency)}
-              </Typography>
-            </Stack>
-            <LinearProgress
-              variant="determinate"
-              value={total ? Math.min((amount / total) * 100, 100) : 0}
-              sx={{ mt: 0.5, height: 4, borderRadius: 4 }}
-            />
-          </Box>
-        ))}
-        {!expenses.length && (
-          <Typography sx={{ color: 'text.secondary', fontSize: 13 }}>
-            Todavía no hay gastos registrados.
-          </Typography>
-        )}
-        <Divider />
-        <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-          <Typography sx={{ color: 'text.secondary', fontSize: 13 }}>
-            Total gastado
-          </Typography>
-          <Typography sx={{ fontWeight: 800 }}>
-            {formatMoney(total, currency)} / {formatMoney(budget, currency)}
-          </Typography>
-        </Stack>
-      </Stack>
-    </SectionCard>
   )
 }
 
@@ -432,10 +340,14 @@ export function TripDetailsPage() {
                   initialTasks={data.tasks}
                 />
 
-                <ExpensesCard
-                  expenses={data.expenses}
+                <ExpensesManager
+                  tripId={data.trip.id}
+                  tripStartDate={data.trip.start_date}
+                  tripEndDate={data.trip.end_date}
+                  tripCurrency={data.trip.currency}
                   budget={Number(data.trip.budget)}
-                  currency={data.trip.currency}
+                  participants={data.participants}
+                  initialExpenses={data.expenses}
                 />
 
                 <ParticipantsManager

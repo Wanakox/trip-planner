@@ -126,6 +126,28 @@ export type TripExpense = {
   expense_date: string
 }
 
+export type ExpensePayload = {
+  participant_id: number
+  name: string
+  amount: number
+  category: TripExpense['category']
+  currency: string
+  expense_date: string
+}
+
+export type ExpenseSummary = {
+  currency: string
+  budget: string | null
+  total_expenses: string
+  remaining_budget: string | null
+  budget_exceeded: boolean | null
+  participants: Array<{
+    participant_id: number
+    participant_name: string
+    total_expenses: string
+  }>
+}
+
 export type TripParticipant = {
   id: number
   trip_id: number

@@ -17,13 +17,14 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import { useMemo, useState } from 'react'
 
 import {
   addParticipant,
   deleteParticipant,
+  getExpenseSummary,
   getTripParticipants,
   updateParticipant,
 } from '../../api/trips'
@@ -70,12 +71,22 @@ export function ParticipantsManager({
   const [toDelete, setToDelete] = useState<TripParticipant | null>(null)
   const [name, setName] = useState('')
 
+  const summaryQuery = useQuery({
+    queryKey: ['expense-summary', tripId],
+    queryFn: () => getExpenseSummary(tripId),
+  })
+
   const totals = useMemo(
-    () => expenses.reduce<Record<number, number>>((result, expense) => {
+    () => summaryQuery.data
+      ? summaryQuery.data.participants.reduce<Record<number, number>>((result, participant) => {
+          result[participant.participant_id] = Number(participant.total_expenses)
+          return result
+        }, {})
+      : expenses.reduce<Record<number, number>>((result, expense) => {
       result[expense.participant_id] = (result[expense.participant_id] ?? 0) + Number(expense.amount)
       return result
     }, {}),
-    [expenses],
+    [expenses, summaryQuery.data],
   )
 
   const formatMoney = (amount: number) => new Intl.NumberFormat('es-ES', {

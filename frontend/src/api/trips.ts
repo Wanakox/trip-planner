@@ -10,6 +10,8 @@ import type {
   ActivityOrderPayload,
   ActivityPayload,
   TripExpense,
+  ExpensePayload,
+  ExpenseSummary,
   TripParticipant,
   TripFile,
   TripTask,
@@ -245,6 +247,40 @@ export async function reorderTasks(
 export async function getTripParticipants(tripId: number): Promise<TripParticipant[]> {
   const { data } = await httpClient.get<TripParticipant[]>(`/trips/${tripId}/participants`)
   return data
+}
+
+export async function getTripExpenses(tripId: number): Promise<TripExpense[]> {
+  const { data } = await httpClient.get<TripExpense[]>(`/trips/${tripId}/expenses`)
+  return data
+}
+
+export async function getExpenseSummary(tripId: number): Promise<ExpenseSummary> {
+  const { data } = await httpClient.get<ExpenseSummary>(`/trips/${tripId}/expenses/summary`)
+  return data
+}
+
+export async function addExpense(
+  tripId: number,
+  payload: ExpensePayload,
+): Promise<TripExpense> {
+  const { data } = await httpClient.post<TripExpense>(`/trips/${tripId}/expenses`, payload)
+  return data
+}
+
+export async function updateExpense(
+  tripId: number,
+  expenseId: number,
+  payload: ExpensePayload,
+): Promise<TripExpense> {
+  const { data } = await httpClient.patch<TripExpense>(
+    `/trips/${tripId}/expenses/${expenseId}`,
+    payload,
+  )
+  return data
+}
+
+export async function deleteExpense(tripId: number, expenseId: number): Promise<void> {
+  await httpClient.delete(`/trips/${tripId}/expenses/${expenseId}`)
 }
 
 export async function addParticipant(
