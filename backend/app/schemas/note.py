@@ -16,8 +16,7 @@ class NoteCreate(BaseModel):
         min_length=1,
     )
 
-    day_number: int | None = Field(
-        default=None,
+    day_number: int = Field(
         ge=1,
     )
 
@@ -68,6 +67,19 @@ class NoteUpdate(BaseModel):
         default=None,
         ge=1,
     )
+
+    @field_validator("day_number")
+    @classmethod
+    def require_day_number(
+        cls,
+        value: int | None,
+    ) -> int:
+        if value is None:
+            raise ValueError(
+                "The note day is required"
+            )
+
+        return value
 
     @field_validator("title")
     @classmethod

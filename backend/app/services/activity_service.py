@@ -324,7 +324,6 @@ def delete_activity_from_trip(
     )
 
     deleted_day_number = activity.day_number
-    deleted_order = activity.order
 
     activities = get_activities_by_trip_id(
         db=db,
@@ -337,26 +336,23 @@ def delete_activity_from_trip(
         commit=False,
     )
 
+    db.flush()
+
     remaining_activities = [
         current_activity
         for current_activity in activities
         if current_activity.id != activity.id
     ]
 
-    for current_activity in remaining_activities:
-        if (
-            current_activity.day_number
-            == deleted_day_number
-            and current_activity.order > deleted_order
-        ):
-            current_activity.order -= 1
+    normalize_day_orders(
+        activities=remaining_activities,
+        day_number=deleted_day_number,
+    )
 
-    try:
-        db.commit()
-
-    except Exception:
-        db.rollback()
-        raise
+    save_activities(
+        db=db,
+        activities=remaining_activities,
+    )
 
 
 def set_activity_completion(
@@ -434,6 +430,20 @@ def reorder_trip_activities(
         activity.id: activity
         for activity in activities
     }
+
+    temporary_order_start = len(activities) + 1
+
+    for index, activity in enumerate(
+        activities,
+        start=temporary_order_start,
+    ):
+        activity.order = index
+
+    try:
+        db.flush()
+    except Exception:
+        db.rollback()
+        raise
 
     for activity_data in order_data.activities:
         activity = activities_by_id[

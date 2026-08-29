@@ -1,3 +1,5 @@
+from datetime import date
+
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import (
@@ -5,7 +7,7 @@ from app.core.exceptions import (
     NoteDayAlreadyExistsError,
     NoteLimitExceededError,
     NoteNotFoundError,
-    TripNotCompletedError,
+    NotesUnavailableError,
     TripNotFoundError,
 )
 from app.models.note import Note
@@ -72,29 +74,36 @@ def get_note_or_raise(
     return note
 
 
-def validate_completed_trip(
+def get_max_available_note_day(
     trip: Trip,
-) -> None:
+    current_date: date | None = None,
+) -> int:
     """
-    Comprueba que el viaje está completado.
+    Devuelve el último día para el que se puede gestionar
+    una nota según el estado y la fecha actual del viaje.
     """
 
-    if trip.status != TripStatus.COMPLETED:
-        raise TripNotCompletedError
+    if trip.status == TripStatus.COMPLETED:
+        return trip.total_days
+
+    if trip.status == TripStatus.IN_PROGRESS:
+        today = current_date or date.today()
+        current_day = (today - trip.start_date).days + 1
+        return max(0, min(current_day, trip.total_days))
+
+    raise NotesUnavailableError
 
 
 def validate_note_day(
     trip: Trip,
-    day_number: int | None,
+    day_number: int,
+    max_available_day: int,
 ) -> None:
     """
     Comprueba que el día indicado pertenece al viaje.
     """
 
-    if day_number is None:
-        return
-
-    if day_number > trip.total_days:
+    if day_number > trip.total_days or day_number > max_available_day:
         raise InvalidNoteDayError
 
 
@@ -145,9 +154,7 @@ def get_trip_notes(
         user_id=user.id,
     )
 
-    validate_completed_trip(
-        trip=trip,
-    )
+    get_max_available_note_day(trip)
 
     return get_notes_by_trip_id(
         db=db,
@@ -171,9 +178,7 @@ def add_note_to_trip(
         user_id=user.id,
     )
 
-    validate_completed_trip(
-        trip=trip,
-    )
+    max_available_day = get_max_available_note_day(trip)
 
     current_note_count = count_notes_by_trip_id(
         db=db,
@@ -186,6 +191,7 @@ def add_note_to_trip(
     validate_note_day(
         trip=trip,
         day_number=note_data.day_number,
+        max_available_day=max_available_day,
     )
 
     validate_available_note_day(
@@ -224,9 +230,7 @@ def update_note_in_trip(
         user_id=user.id,
     )
 
-    validate_completed_trip(
-        trip=trip,
-    )
+    max_available_day = get_max_available_note_day(trip)
 
     note = get_note_or_raise(
         db=db,
@@ -244,6 +248,7 @@ def update_note_in_trip(
         validate_note_day(
             trip=trip,
             day_number=new_day_number,
+            max_available_day=max_available_day,
         )
 
         validate_available_note_day(
@@ -282,9 +287,7 @@ def delete_note_from_trip(
         user_id=user.id,
     )
 
-    validate_completed_trip(
-        trip=trip,
-    )
+    get_max_available_note_day(trip)
 
     note = get_note_or_raise(
         db=db,

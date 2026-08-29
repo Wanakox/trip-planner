@@ -15,7 +15,7 @@ from app.core.exceptions import (
     NoteDayAlreadyExistsError,
     NoteLimitExceededError,
     NoteNotFoundError,
-    TripNotCompletedError,
+    NotesUnavailableError,
     TripNotFoundError,
 )
 from app.db.dependencies import get_db
@@ -74,12 +74,12 @@ def get_notes(
             detail="Trip not found",
         ) from exc
 
-    except TripNotCompletedError as exc:
+    except NotesUnavailableError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=(
-                "Notes can only be accessed "
-                "for completed trips"
+                "Notes are only available for "
+                "in-progress or completed trips"
             ),
         ) from exc
 
@@ -110,12 +110,12 @@ def add_new_note(
             detail="Trip not found",
         ) from exc
 
-    except TripNotCompletedError as exc:
+    except NotesUnavailableError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=(
-                "Notes can only be added "
-                "to completed trips"
+                "Notes can only be added to "
+                "in-progress or completed trips"
             ),
         ) from exc
 
@@ -123,8 +123,8 @@ def add_new_note(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=(
-                "The note day must be within "
-                "the trip duration"
+                "The note day must have been reached "
+                "and be within the trip duration"
             ),
         ) from exc
 
@@ -175,12 +175,12 @@ def update_existing_note(
             detail="Trip not found",
         ) from exc
 
-    except TripNotCompletedError as exc:
+    except NotesUnavailableError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=(
-                "Notes can only be updated "
-                "for completed trips"
+                "Notes can only be updated for "
+                "in-progress or completed trips"
             ),
         ) from exc
 
@@ -194,8 +194,8 @@ def update_existing_note(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=(
-                "The note day must be within "
-                "the trip duration"
+                "The note day must have been reached "
+                "and be within the trip duration"
             ),
         ) from exc
 
@@ -238,12 +238,12 @@ def delete_existing_note(
             detail="Trip not found",
         ) from exc
 
-    except TripNotCompletedError as exc:
+    except NotesUnavailableError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=(
-                "Notes can only be deleted "
-                "from completed trips"
+                "Notes can only be deleted from "
+                "in-progress or completed trips"
             ),
         ) from exc
 
