@@ -51,6 +51,7 @@ export type TripUpdatePayload = {
   start_date: string
   end_date: string
   budget: number
+  currency: string
   status: TripStatus
 }
 

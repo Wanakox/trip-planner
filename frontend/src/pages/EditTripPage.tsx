@@ -16,6 +16,7 @@ import { useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 
 import { getTrip, updateTrip } from '../api/trips'
+import { getCurrencies } from '../api/currency'
 import type { TripStatus, TripUpdatePayload } from '../types/trip'
 
 type EditTripForm = {
@@ -25,6 +26,7 @@ type EditTripForm = {
   startDate: string
   endDate: string
   budget: string
+  currency: string
   status: TripStatus
 }
 
@@ -35,6 +37,7 @@ const emptyForm: EditTripForm = {
   startDate: '',
   endDate: '',
   budget: '0',
+  currency: 'EUR',
   status: 'planning',
 }
 
@@ -64,6 +67,12 @@ export function EditTripPage() {
     enabled: Number.isInteger(numericTripId) && numericTripId > 0,
   })
 
+  const currenciesQuery = useQuery({
+    queryKey: ['currencies'],
+    queryFn: getCurrencies,
+    staleTime: 1000 * 60 * 60,
+  })
+
   const displayedForm = tripQuery.data
     ? form ?? {
         name: tripQuery.data.name,
@@ -72,6 +81,7 @@ export function EditTripPage() {
         startDate: tripQuery.data.start_date,
         endDate: tripQuery.data.end_date,
         budget: String(tripQuery.data.budget),
+        currency: tripQuery.data.currency,
         status: tripQuery.data.status,
       }
     : emptyForm
@@ -120,6 +130,7 @@ export function EditTripPage() {
       start_date: displayedForm.startDate,
       end_date: displayedForm.endDate,
       budget: Number(displayedForm.budget),
+      currency: displayedForm.currency,
       status: displayedForm.status,
     })
   }
@@ -251,6 +262,33 @@ export function EditTripPage() {
               />
               <TextField
                 select
+                label="Moneda"
+                value={displayedForm.currency}
+                onChange={(event) =>
+                  updateField('currency', event.target.value)
+                }
+                required
+                disabled={
+                  currenciesQuery.isPending ||
+                  currenciesQuery.isError
+                }
+                error={currenciesQuery.isError}
+                helperText={
+                  currenciesQuery.isPending
+                    ? 'Cargando monedas...'
+                    : currenciesQuery.isError
+                      ? 'No se pudieron cargar las monedas.'
+                      : undefined
+                }
+              >
+                {(currenciesQuery.data ?? []).map((currency) => (
+                  <MenuItem key={currency.code} value={currency.code}>
+                    {currency.code} — {currency.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
                 label="Estado"
                 value={displayedForm.status}
                 onChange={(event) =>
@@ -290,7 +328,15 @@ export function EditTripPage() {
               >
                 Cancelar
               </Button>
-              <Button type="submit" variant="contained" disabled={mutation.isPending}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={
+                  mutation.isPending ||
+                  currenciesQuery.isPending ||
+                  currenciesQuery.isError
+                }
+              >
                 {mutation.isPending ? 'Guardando...' : 'Guardar cambios'}
               </Button>
             </Stack>
