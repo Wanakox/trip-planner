@@ -1,11 +1,9 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import BedOutlinedIcon from '@mui/icons-material/BedOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
-import DirectionsBusOutlinedIcon from '@mui/icons-material/DirectionsBusOutlined'
 import DownloadIcon from '@mui/icons-material/Download'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
-import FlightOutlinedIcon from '@mui/icons-material/FlightOutlined'
 import StarOutlineIcon from '@mui/icons-material/StarOutlined'
 import {
   Alert,
@@ -38,6 +36,7 @@ import {
   rateTrip,
 } from '../api/trips'
 import { ActivitiesManager } from '../components/trips/ActivitiesManager'
+import { TransportsManager } from '../components/trips/TransportsManager'
 import type {
   TripExpense,
   TripStatus,
@@ -462,40 +461,13 @@ export function TripDetailsPage() {
                   currency={data.trip.currency}
                 />
 
-                <SectionCard title="Transporte">
-                  <Stack spacing={1.5}>
-                    {data.transports.map((transport) => (
-                      <Stack key={transport.id} direction="row" spacing={1.5}>
-                        <Avatar
-                          variant="rounded"
-                          sx={{ bgcolor: 'primary.light', color: 'primary.main' }}
-                        >
-                          {transport.transport_type === 'flight' ? (
-                            <FlightOutlinedIcon />
-                          ) : (
-                            <DirectionsBusOutlinedIcon />
-                          )}
-                        </Avatar>
-                        <Box>
-                          <Typography sx={{ fontSize: 13, fontWeight: 750 }}>
-                            {transport.origin} → {transport.destination}
-                          </Typography>
-                          <Typography sx={{ color: 'text.secondary', fontSize: 12 }}>
-                            {formatDate(transport.departure_date)}
-                            {transport.departure_time
-                              ? ` · ${transport.departure_time.slice(0, 5)}`
-                              : ''}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    ))}
-                    {!data.transports.length && (
-                      <Typography sx={{ color: 'text.secondary', fontSize: 13 }}>
-                        No hay transportes registrados.
-                      </Typography>
-                    )}
-                  </Stack>
-                </SectionCard>
+                <TransportsManager
+                  tripId={data.trip.id}
+                  tripStartDate={data.trip.start_date}
+                  tripEndDate={data.trip.end_date}
+                  currency={data.trip.currency}
+                  initialTransports={data.transports}
+                />
 
                 <SectionCard title="Alojamiento">
                   <Stack spacing={1.5}>

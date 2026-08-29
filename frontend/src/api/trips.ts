@@ -13,6 +13,7 @@ import type {
   TripTask,
   TripTransport,
   TripUpdatePayload,
+  TransportPayload,
 } from '../types/trip'
 import { httpClient } from './http'
 
@@ -182,6 +183,47 @@ export async function reorderActivities(
     payload,
   )
   return data
+}
+
+export async function getTripTransports(
+  tripId: number,
+): Promise<TripTransport[]> {
+  const { data } = await httpClient.get<TripTransport[]>(
+    `/trips/${tripId}/transports`,
+  )
+  return data
+}
+
+export async function addTransport(
+  tripId: number,
+  payload: TransportPayload,
+): Promise<TripTransport> {
+  const { data } = await httpClient.post<TripTransport>(
+    `/trips/${tripId}/transports`,
+    payload,
+  )
+  return data
+}
+
+export async function updateTransport(
+  tripId: number,
+  transportId: number,
+  payload: TransportPayload,
+): Promise<TripTransport> {
+  const { data } = await httpClient.patch<TripTransport>(
+    `/trips/${tripId}/transports/${transportId}`,
+    payload,
+  )
+  return data
+}
+
+export async function deleteTransport(
+  tripId: number,
+  transportId: number,
+): Promise<void> {
+  await httpClient.delete(
+    `/trips/${tripId}/transports/${transportId}`,
+  )
 }
 
 export async function getTripDetails(

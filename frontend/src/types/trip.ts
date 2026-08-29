@@ -131,6 +131,19 @@ export type TripTransport = {
   arrival_time: string | null
   origin: string
   destination: string
+  check_in_date: string | null
+}
+
+export type TransportPayload = {
+  transport_type: TripTransport['transport_type']
+  price: number | null
+  departure_date: string
+  arrival_date: string | null
+  departure_time: string | null
+  arrival_time: string | null
+  origin: string
+  destination: string
+  check_in_date: string | null
 }
 
 export type TripAccommodation = {
