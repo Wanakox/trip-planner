@@ -4,10 +4,12 @@ import BedOutlinedIcon from '@mui/icons-material/BedOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import DirectionsBusOutlinedIcon from '@mui/icons-material/DirectionsBusOutlined'
 import DownloadIcon from '@mui/icons-material/Download'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined'
 import FlightOutlinedIcon from '@mui/icons-material/FlightOutlined'
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
+import StarOutlineIcon from '@mui/icons-material/StarOutlined'
 import {
   Alert,
   Avatar,
@@ -17,16 +19,27 @@ import {
   Chip,
   CircularProgress,
   Divider,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   LinearProgress,
   Paper,
+  Rating,
   Stack,
   Typography,
 } from '@mui/material'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
-import { Link as RouterLink, useParams } from 'react-router-dom'
+import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 
-import { downloadTripExport, getTripDetails } from '../api/trips'
+import {
+  deleteTrip,
+  downloadTripExport,
+  getTripDetails,
+  rateTrip,
+} from '../api/trips'
 import type {
   TripActivity,
   TripExpense,
@@ -221,13 +234,51 @@ function ExpensesCard({
 export function TripDetailsPage() {
   const { tripId } = useParams()
   const numericTripId = Number(tripId)
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [exporting, setExporting] = useState(false)
   const [exportError, setExportError] = useState(false)
+  const [ratingOpen, setRatingOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [selectedRating, setSelectedRating] = useState<number | null>(null)
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['trip-details', numericTripId],
     queryFn: () => getTripDetails(numericTripId),
     enabled: Number.isInteger(numericTripId) && numericTripId > 0,
   })
+
+  const ratingMutation = useMutation({
+    mutationFn: (rating: number) => rateTrip(numericTripId, rating),
+    onSuccess: async (updatedTrip) => {
+      queryClient.setQueryData(
+        ['trip-details', numericTripId],
+        (current: typeof data) =>
+          current ? { ...current, trip: updatedTrip } : current,
+      )
+      await queryClient.invalidateQueries({ queryKey: ['trips'] })
+      setRatingOpen(false)
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteTrip(numericTripId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['trips'] })
+      navigate('/viajes', { replace: true })
+    },
+  })
+
+  const openRating = () => {
+    if (!data || data.trip.status !== 'completed') return
+    setSelectedRating(data.trip.rating)
+    ratingMutation.reset()
+    setRatingOpen(true)
+  }
+
+  const openDelete = () => {
+    deleteMutation.reset()
+    setDeleteOpen(true)
+  }
 
   const handleExport = async () => {
     if (!data) return
@@ -347,7 +398,11 @@ export function TripDetailsPage() {
                   </Typography>
                 </Stack>
               </Box>
-              <Stack direction="row" spacing={1}>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ flexWrap: 'wrap', justifyContent: { sm: 'flex-end' } }}
+              >
                 <Button
                   variant="outlined"
                   startIcon={<DownloadIcon />}
@@ -357,12 +412,30 @@ export function TripDetailsPage() {
                   {exporting ? 'Exportando...' : 'Exportar'}
                 </Button>
                 <Button
+                  variant="outlined"
+                  startIcon={<StarOutlineIcon />}
+                  onClick={openRating}
+                  disabled={data.trip.status !== 'completed'}
+                >
+                  {data.trip.rating
+                    ? `Valoración: ${data.trip.rating}/5`
+                    : 'Valorar'}
+                </Button>
+                <Button
                   component={RouterLink}
                   to={`/viajes/${data.trip.id}/editar`}
                   variant="contained"
                   startIcon={<EditOutlinedIcon />}
                 >
                   Editar viaje
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteOutlineIcon />}
+                  onClick={openDelete}
+                >
+                  Eliminar viaje
                 </Button>
               </Stack>
             </Stack>
@@ -564,6 +637,90 @@ export function TripDetailsPage() {
             </Box>
           </>
         )}
+
+        <Dialog
+          open={ratingOpen}
+          onClose={() => !ratingMutation.isPending && setRatingOpen(false)}
+          fullWidth
+          maxWidth="xs"
+        >
+          <DialogTitle>Valorar viaje</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Selecciona una valoración para este viaje.
+            </DialogContentText>
+            <Box sx={{ mt: 3, display: 'grid', placeItems: 'center' }}>
+              <Rating
+                size="large"
+                value={selectedRating}
+                onChange={(_, value) => setSelectedRating(value)}
+                disabled={ratingMutation.isPending}
+              />
+            </Box>
+            {ratingMutation.isError && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                No se ha podido guardar la valoración.
+              </Alert>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setRatingOpen(false)}
+              disabled={ratingMutation.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              disabled={!selectedRating || ratingMutation.isPending}
+              onClick={() => {
+                if (selectedRating) ratingMutation.mutate(selectedRating)
+              }}
+            >
+              {ratingMutation.isPending
+                ? 'Guardando...'
+                : 'Guardar valoración'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog
+          open={deleteOpen}
+          onClose={() => !deleteMutation.isPending && setDeleteOpen(false)}
+          fullWidth
+          maxWidth="xs"
+        >
+          <DialogTitle>Eliminar viaje</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Esta acción eliminará el viaje y todos sus datos asociados de
+              forma permanente. ¿Quieres continuar?
+            </DialogContentText>
+            {deleteMutation.isError && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                No se ha podido eliminar el viaje.
+              </Alert>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setDeleteOpen(false)}
+              disabled={deleteMutation.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => deleteMutation.mutate()}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending
+                ? 'Eliminando...'
+                : 'Eliminar definitivamente'}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   )

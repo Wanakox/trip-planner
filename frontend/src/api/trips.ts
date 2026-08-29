@@ -53,6 +53,25 @@ export async function updateTrip(
   return data
 }
 
+export async function rateTrip(
+  tripId: number,
+  rating: number,
+): Promise<Trip> {
+  const { data } =
+    await httpClient.put<Trip>(
+      `/trips/${tripId}/rating`,
+      { rating },
+    )
+
+  return data
+}
+
+export async function deleteTrip(
+  tripId: number,
+): Promise<void> {
+  await httpClient.delete(`/trips/${tripId}`)
+}
+
 export async function getTripDetails(
   tripId: number,
 ): Promise<TripDetails> {
