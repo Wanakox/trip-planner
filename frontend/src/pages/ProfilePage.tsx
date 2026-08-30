@@ -1,5 +1,6 @@
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
 import PersonOutlineIcon from '@mui/icons-material/PersonOutlineOutlined'
 import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined'
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined'
@@ -173,6 +174,12 @@ export function ProfilePage() {
     reader.readAsDataURL(file)
   }
 
+  const handleLogout = () => {
+    clearStoredSession()
+    queryClient.clear()
+    navigate('/', { replace: true })
+  }
+
   if (profileQuery.isLoading) {
     return (
       <Box sx={{ minHeight: 360, display: 'grid', placeItems: 'center' }}>
@@ -198,7 +205,10 @@ export function ProfilePage() {
           <Typography component="h1" sx={{ fontSize: { xs: 27, md: 32 }, fontWeight: 900 }}>Mi perfil</Typography>
           <Typography sx={{ mt: 0.5, color: 'text.secondary' }}>Consulta y modifica la información de tu cuenta.</Typography>
         </Box>
-        {!editing && <Button variant="contained" startIcon={<EditOutlinedIcon />} onClick={() => { setForm(profileToPayload(user)); saveMutation.reset(); setSelectedPhoto(null); setPhotoPreviewUrl(undefined); setRemovePhoto(false); setPhotoValidationError(''); setEditing(true) }}>Editar perfil</Button>}
+        {!editing && <Stack direction="row" spacing={1}>
+          <Button variant="outlined" startIcon={<LogoutOutlinedIcon />} onClick={handleLogout}>Cerrar sesión</Button>
+          <Button variant="contained" startIcon={<EditOutlinedIcon />} onClick={() => { setForm(profileToPayload(user)); saveMutation.reset(); setSelectedPhoto(null); setPhotoPreviewUrl(undefined); setRemovePhoto(false); setPhotoValidationError(''); setEditing(true) }}>Editar perfil</Button>
+        </Stack>}
       </Stack>
 
       <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: '22px', borderColor: '#dce3ec' }}>

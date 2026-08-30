@@ -81,6 +81,9 @@ export function ParticipantsManager({
     queryKey: ['current-user'],
     queryFn: getCurrentUser,
   })
+  const ownerParticipantId = participants.length
+    ? Math.min(...participants.map((participant) => participant.id))
+    : null
   const ownerName = profileQuery.data
     ? `${profileQuery.data.name} ${profileQuery.data.surname}`.trim().toLocaleLowerCase()
     : ''
@@ -157,7 +160,10 @@ export function ParticipantsManager({
       <Stack spacing={1}>
         {participants.map((participant) => (
           <Stack key={participant.id} direction="row" spacing={1.25} sx={{ p: 1, alignItems: 'center', bgcolor: '#f7f9fc', borderRadius: '12px' }}>
-            {profileQuery.data && participant.name.trim().toLocaleLowerCase() === ownerName
+            {profileQuery.data && (
+              participant.id === ownerParticipantId
+              || participant.name.trim().toLocaleLowerCase() === ownerName
+            )
               ? <UserAvatar user={profileQuery.data} size={34} />
               : <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.light', color: 'primary.main', fontSize: 12, fontWeight: 800 }}>{initials(participant.name)}</Avatar>}
             <Box sx={{ flex: 1, minWidth: 0 }}>
