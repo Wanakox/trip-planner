@@ -207,8 +207,6 @@ def search_flights(
         key=lambda offer: offer.price
     )
 
-    offers = offers[:10]
-
     return FlightSearchResponse(
         origin=normalized_origin,
         destination=normalized_destination,
