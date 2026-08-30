@@ -129,6 +129,9 @@ export function ProfilePage() {
 
   const cancelEditing = () => {
     saveMutation.reset()
+    photoMutation.reset()
+    removePhotoMutation.reset()
+    setPhotoValidationError('')
     setEditing(false)
   }
 
@@ -186,7 +189,7 @@ export function ProfilePage() {
           <Typography component="h1" sx={{ fontSize: { xs: 27, md: 32 }, fontWeight: 900 }}>Mi perfil</Typography>
           <Typography sx={{ mt: 0.5, color: 'text.secondary' }}>Consulta y modifica la información de tu cuenta.</Typography>
         </Box>
-        {!editing && <Button variant="contained" startIcon={<EditOutlinedIcon />} onClick={() => { setForm(profileToPayload(user)); saveMutation.reset(); setEditing(true) }}>Editar perfil</Button>}
+        {!editing && <Button variant="contained" startIcon={<EditOutlinedIcon />} onClick={() => { setForm(profileToPayload(user)); saveMutation.reset(); photoMutation.reset(); removePhotoMutation.reset(); setPhotoValidationError(''); setEditing(true) }}>Editar perfil</Button>}
       </Stack>
 
       <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: '22px', borderColor: '#dce3ec' }}>
@@ -195,9 +198,8 @@ export function ProfilePage() {
           <Box sx={{ flex: 1 }}>
             <Typography sx={{ fontSize: 22, fontWeight: 850 }}>{user.name} {user.surname}</Typography>
             <Typography sx={{ color: 'text.secondary' }}>@{user.username}</Typography>
-            <Typography sx={{ mt: 0.5, color: 'text.secondary', fontSize: 13 }}>Identificador de cuenta: {user.id}</Typography>
           </Box>
-          <Stack spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'flex-end' } }}>
+          {editing && <Stack spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'flex-end' } }}>
             <Button component="label" variant="outlined" startIcon={<PhotoCameraOutlinedIcon />} disabled={photoMutation.isPending || removePhotoMutation.isPending}>
               {photoMutation.isPending ? 'Subiendo...' : user.profile_photo ? 'Cambiar foto' : 'Añadir foto'}
               <input hidden type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={handlePhoto} />
@@ -205,7 +207,7 @@ export function ProfilePage() {
             {user.profile_photo && <Button color="error" size="small" onClick={() => removePhotoMutation.mutate()} disabled={photoMutation.isPending || removePhotoMutation.isPending}>Eliminar foto</Button>}
             {photoValidationError && <Typography color="error" sx={{ maxWidth: 260, fontSize: 12 }}>{photoValidationError}</Typography>}
             {(photoMutation.isError || removePhotoMutation.isError) && <Typography color="error" sx={{ maxWidth: 260, fontSize: 12 }}>No se ha podido guardar la foto. Usa JPG o PNG de hasta 5 MB.</Typography>}
-          </Stack>
+          </Stack>}
         </Stack>
 
         <Divider />

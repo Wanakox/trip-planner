@@ -71,6 +71,13 @@ export function TripDetailsPage() {
     queryFn: () => getTripDetails(numericTripId),
     enabled: Number.isInteger(numericTripId) && numericTripId > 0,
   })
+  const usedCurrencies = data
+    ? Array.from(new Set([
+        data.trip.currency,
+        ...data.trip.destinations.map((destination) => destination.currency),
+        ...data.expenses.map((expense) => expense.currency),
+      ].map((currency) => currency.toUpperCase())))
+    : []
 
   const ratingMutation = useMutation({
     mutationFn: (rating: number) => rateTrip(numericTripId, rating),
@@ -221,6 +228,14 @@ export function TripDetailsPage() {
                   <Typography sx={{ fontSize: 13 }}>
                     {formatDate(data.trip.start_date)} - {formatDate(data.trip.end_date)} ({data.trip.total_days} días)
                   </Typography>
+                </Stack>
+                <Stack direction="row" spacing={1} sx={{ mt: 1.25, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Typography sx={{ color: 'text.secondary', fontSize: 13, fontWeight: 700 }}>
+                    Monedas utilizadas:
+                  </Typography>
+                  {usedCurrencies.map((currency) => (
+                    <Chip key={currency} label={currency} size="small" variant="outlined" />
+                  ))}
                 </Stack>
               </Box>
               <Stack

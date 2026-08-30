@@ -38,7 +38,11 @@ export async function getCurrentUserPhoto(): Promise<Blob> {
 export async function uploadCurrentUserPhoto(file: File): Promise<UserProfile> {
   const formData = new FormData()
   formData.append('photo', file)
-  const { data } = await httpClient.post<UserProfile>('/users/me/profile-photo', formData)
+  const { data } = await httpClient.post<UserProfile>('/users/me/profile-photo', formData, {
+    // El cliente general usa JSON. Al anularlo, el navegador añade el
+    // boundary multipart correcto para FormData.
+    headers: { 'Content-Type': null },
+  })
   return data
 }
 
