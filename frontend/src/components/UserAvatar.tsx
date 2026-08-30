@@ -1,6 +1,5 @@
 import { Avatar } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useMemo } from 'react'
 
 import { getCurrentUserPhoto } from '../api/user'
 import type { UserProfile } from '../api/user'
@@ -16,18 +15,9 @@ export function UserAvatar({ user, size = 42 }: { user: UserProfile; size?: numb
     enabled: Boolean(user.profile_photo),
     staleTime: Infinity,
   })
-  const photoUrl = useMemo(
-    () => photoQuery.data ? URL.createObjectURL(photoQuery.data) : undefined,
-    [photoQuery.data],
-  )
-
-  useEffect(() => () => {
-    if (photoUrl) URL.revokeObjectURL(photoUrl)
-  }, [photoUrl])
-
   return (
     <Avatar
-      src={photoUrl}
+      src={photoQuery.data}
       sx={{
         width: size,
         height: size,

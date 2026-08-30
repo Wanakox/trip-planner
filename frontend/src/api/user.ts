@@ -28,11 +28,16 @@ export async function deleteCurrentUser(): Promise<void> {
   await httpClient.delete('/users/me')
 }
 
-export async function getCurrentUserPhoto(): Promise<Blob> {
+export async function getCurrentUserPhoto(): Promise<string> {
   const { data } = await httpClient.get<Blob>('/users/me/profile-photo', {
     responseType: 'blob',
   })
-  return data
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(data)
+  })
 }
 
 export async function uploadCurrentUserPhoto(file: File): Promise<UserProfile> {

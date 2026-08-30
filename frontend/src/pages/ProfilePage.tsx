@@ -5,6 +5,7 @@ import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined'
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined'
 import {
   Alert,
+  Avatar,
   Box,
   Button,
   CircularProgress,
@@ -33,7 +34,7 @@ import {
   updateCurrentUser,
   uploadCurrentUserPhoto,
 } from '../api/user'
-import type { UserProfile, UserProfilePayload } from '../api/user'
+import type { UserProfilePayload } from '../api/user'
 import { UserAvatar } from '../components/UserAvatar'
 import { clearStoredSession } from '../utils/authSession'
 
@@ -80,6 +81,9 @@ export function ProfilePage() {
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [form, setForm] = useState<UserProfilePayload>(emptyForm)
   const [photoValidationError, setPhotoValidationError] = useState('')
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null)
+  const [removePhoto, setRemovePhoto] = useState(false)
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string>()
 
   const profileQuery = useQuery({
     queryKey: ['current-user'],
@@ -91,9 +95,26 @@ export function ProfilePage() {
   })
 
   const saveMutation = useMutation({
-    mutationFn: (payload: UserProfilePayload) => updateCurrentUser(payload),
+    mutationFn: async ({ payload, photo, shouldRemovePhoto }: {
+      payload: UserProfilePayload
+      photo: File | null
+      shouldRemovePhoto: boolean
+    }) => {
+      let updatedUser = await updateCurrentUser(payload)
+      if (photo) updatedUser = await uploadCurrentUserPhoto(photo)
+      else if (shouldRemovePhoto) {
+        await deleteCurrentUserPhoto()
+        updatedUser = { ...updatedUser, profile_photo: null }
+      }
+      return updatedUser
+    },
     onSuccess: (updatedUser) => {
       queryClient.setQueryData(['current-user'], updatedUser)
+      queryClient.removeQueries({ queryKey: ['current-user-photo'] })
+      setSelectedPhoto(null)
+      setPhotoPreviewUrl(undefined)
+      setRemovePhoto(false)
+      setPhotoValidationError('')
       setEditing(false)
     },
   })
@@ -107,30 +128,11 @@ export function ProfilePage() {
     },
   })
 
-  const photoMutation = useMutation({
-    mutationFn: uploadCurrentUserPhoto,
-    onSuccess: (updatedUser) => {
-      setPhotoValidationError('')
-      queryClient.setQueryData(['current-user'], updatedUser)
-      queryClient.removeQueries({ queryKey: ['current-user-photo'] })
-    },
-  })
-
-  const removePhotoMutation = useMutation({
-    mutationFn: deleteCurrentUserPhoto,
-    onSuccess: () => {
-      queryClient.setQueryData(
-        ['current-user'],
-        (current: UserProfile | undefined) => current ? { ...current, profile_photo: null } : current,
-      )
-      queryClient.removeQueries({ queryKey: ['current-user-photo'] })
-    },
-  })
-
   const cancelEditing = () => {
     saveMutation.reset()
-    photoMutation.reset()
-    removePhotoMutation.reset()
+    setSelectedPhoto(null)
+    setPhotoPreviewUrl(undefined)
+    setRemovePhoto(false)
     setPhotoValidationError('')
     setEditing(false)
   }
@@ -138,12 +140,16 @@ export function ProfilePage() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     saveMutation.mutate({
-      ...form,
-      name: form.name.trim(),
-      surname: form.surname.trim(),
-      username: form.username.trim(),
-      email: form.email.trim().toLowerCase(),
-      profile_photo: form.profile_photo,
+      payload: {
+        ...form,
+        name: form.name.trim(),
+        surname: form.surname.trim(),
+        username: form.username.trim(),
+        email: form.email.trim().toLowerCase(),
+        profile_photo: form.profile_photo,
+      },
+      photo: selectedPhoto,
+      shouldRemovePhoto: removePhoto,
     })
   }
 
@@ -151,7 +157,6 @@ export function ProfilePage() {
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file) return
-    photoMutation.reset()
     setPhotoValidationError('')
     if (!['image/jpeg', 'image/png'].includes(file.type)) {
       setPhotoValidationError('Selecciona una imagen JPG o PNG.')
@@ -161,7 +166,11 @@ export function ProfilePage() {
       setPhotoValidationError('La imagen no puede superar los 5 MB.')
       return
     }
-    photoMutation.mutate(file)
+    setSelectedPhoto(file)
+    setRemovePhoto(false)
+    const reader = new FileReader()
+    reader.onload = () => setPhotoPreviewUrl(String(reader.result))
+    reader.readAsDataURL(file)
   }
 
   if (profileQuery.isLoading) {
@@ -189,24 +198,28 @@ export function ProfilePage() {
           <Typography component="h1" sx={{ fontSize: { xs: 27, md: 32 }, fontWeight: 900 }}>Mi perfil</Typography>
           <Typography sx={{ mt: 0.5, color: 'text.secondary' }}>Consulta y modifica la información de tu cuenta.</Typography>
         </Box>
-        {!editing && <Button variant="contained" startIcon={<EditOutlinedIcon />} onClick={() => { setForm(profileToPayload(user)); saveMutation.reset(); photoMutation.reset(); removePhotoMutation.reset(); setPhotoValidationError(''); setEditing(true) }}>Editar perfil</Button>}
+        {!editing && <Button variant="contained" startIcon={<EditOutlinedIcon />} onClick={() => { setForm(profileToPayload(user)); saveMutation.reset(); setSelectedPhoto(null); setPhotoPreviewUrl(undefined); setRemovePhoto(false); setPhotoValidationError(''); setEditing(true) }}>Editar perfil</Button>}
       </Stack>
 
       <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: '22px', borderColor: '#dce3ec' }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2.5} sx={{ p: 3, alignItems: { sm: 'center' }, bgcolor: '#f7f9fc' }}>
-          <UserAvatar user={user} size={86} />
+          {photoPreviewUrl
+            ? <Avatar src={photoPreviewUrl} sx={{ width: 86, height: 86 }} />
+            : removePhoto
+              ? <Avatar sx={{ width: 86, height: 86, bgcolor: 'primary.main', fontSize: 25, fontWeight: 800 }}>{`${user.name[0] ?? ''}${user.surname[0] ?? ''}`.toUpperCase()}</Avatar>
+              : <UserAvatar user={user} size={86} />}
           <Box sx={{ flex: 1 }}>
             <Typography sx={{ fontSize: 22, fontWeight: 850 }}>{user.name} {user.surname}</Typography>
             <Typography sx={{ color: 'text.secondary' }}>@{user.username}</Typography>
           </Box>
           {editing && <Stack spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'flex-end' } }}>
-            <Button component="label" variant="outlined" startIcon={<PhotoCameraOutlinedIcon />} disabled={photoMutation.isPending || removePhotoMutation.isPending}>
-              {photoMutation.isPending ? 'Subiendo...' : user.profile_photo ? 'Cambiar foto' : 'Añadir foto'}
+            <Button component="label" variant="outlined" startIcon={<PhotoCameraOutlinedIcon />} disabled={saveMutation.isPending}>
+              {selectedPhoto ? 'Cambiar selección' : user.profile_photo && !removePhoto ? 'Cambiar foto' : 'Añadir foto'}
               <input hidden type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={handlePhoto} />
             </Button>
-            {user.profile_photo && <Button color="error" size="small" onClick={() => removePhotoMutation.mutate()} disabled={photoMutation.isPending || removePhotoMutation.isPending}>Eliminar foto</Button>}
+            {(user.profile_photo || selectedPhoto) && !removePhoto && <Button color="error" size="small" onClick={() => { setSelectedPhoto(null); setPhotoPreviewUrl(undefined); setRemovePhoto(true) }} disabled={saveMutation.isPending}>Eliminar foto</Button>}
             {photoValidationError && <Typography color="error" sx={{ maxWidth: 260, fontSize: 12 }}>{photoValidationError}</Typography>}
-            {(photoMutation.isError || removePhotoMutation.isError) && <Typography color="error" sx={{ maxWidth: 260, fontSize: 12 }}>No se ha podido guardar la foto. Usa JPG o PNG de hasta 5 MB.</Typography>}
+            {selectedPhoto && <Typography color="text.secondary" sx={{ maxWidth: 260, fontSize: 12 }}>La foto se actualizará al guardar los cambios.</Typography>}
           </Stack>}
         </Stack>
 
@@ -238,13 +251,13 @@ export function ProfilePage() {
           </Stack>}
         </Box>
 
-        <Divider />
+        {editing && <><Divider />
 
         <Box sx={{ p: 3 }}>
           <Typography component="h2" sx={{ color: 'error.main', fontSize: 17, fontWeight: 800 }}>Eliminar cuenta</Typography>
           <Typography sx={{ mt: 0.75, color: 'text.secondary', fontSize: 13 }}>Se eliminarán permanentemente tu perfil, todos tus viajes y sus datos asociados.</Typography>
           <Button color="error" variant="outlined" startIcon={<DeleteOutlineIcon />} onClick={() => { setDeleteConfirmation(''); deleteMutation.reset(); setDeleteOpen(true) }} sx={{ mt: 2 }}>Eliminar mi cuenta</Button>
-        </Box>
+        </Box></>}
       </Paper>
 
       <Dialog open={deleteOpen} onClose={() => !deleteMutation.isPending && setDeleteOpen(false)} fullWidth maxWidth="xs">
