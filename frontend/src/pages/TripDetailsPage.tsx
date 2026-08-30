@@ -36,6 +36,7 @@ import { ParticipantsManager } from '../components/trips/ParticipantsManager'
 import { ExpensesManager } from '../components/trips/ExpensesManager'
 import { NotesManager } from '../components/trips/NotesManager'
 import { DocumentsManager } from '../components/trips/DocumentsManager'
+import { CurrencyConverter } from '../components/trips/CurrencyConverter'
 import type { TripStatus } from '../types/trip'
 
 const statusConfig: Record<
@@ -236,6 +237,7 @@ export function TripDetailsPage() {
                   {usedCurrencies.map((currency) => (
                     <Chip key={currency} label={currency} size="small" variant="outlined" />
                   ))}
+                  <CurrencyConverter currencies={usedCurrencies} />
                 </Stack>
               </Box>
               <Stack
