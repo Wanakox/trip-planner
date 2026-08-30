@@ -7,6 +7,12 @@ from app.core.config import settings
 
 
 CHUNK_SIZE = 1024 * 1024
+PROFILE_IMAGE_MAX_SIZE = 5 * 1024 * 1024
+PROFILE_IMAGE_TYPES = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+}
 
 
 def get_storage_root() -> Path:
@@ -18,6 +24,14 @@ def get_storage_root() -> Path:
     return Path(
         settings.trip_files_storage_path
     ).resolve()
+
+
+def get_profile_storage_root() -> Path:
+    storage_root = Path(
+        settings.profile_images_storage_path
+    ).resolve()
+    storage_root.mkdir(parents=True, exist_ok=True)
+    return storage_root
 
 
 def get_trip_storage_directory(
@@ -141,6 +155,57 @@ async def save_upload_file(
         extension,
         size,
     )
+
+
+def _has_valid_image_signature(content_type: str, header: bytes) -> bool:
+    if content_type == "image/jpeg":
+        return header.startswith(b"\xff\xd8\xff")
+    if content_type == "image/png":
+        return header.startswith(b"\x89PNG\r\n\x1a\n")
+    if content_type == "image/webp":
+        return header.startswith(b"RIFF") and header[8:12] == b"WEBP"
+    return False
+
+
+async def save_profile_image(upload_file: UploadFile, user_id: int) -> str:
+    """Valida y guarda la imagen de perfil del usuario."""
+
+    content_type = (upload_file.content_type or "").lower()
+    extension = PROFILE_IMAGE_TYPES.get(content_type)
+    if extension is None:
+        await upload_file.close()
+        raise ValueError("Unsupported profile image type")
+
+    destination = get_profile_storage_root() / f"{user_id}-{uuid4()}.{extension}"
+    size = 0
+    header = b""
+    try:
+        with destination.open("wb") as stored_file:
+            while chunk := await upload_file.read(CHUNK_SIZE):
+                if not header:
+                    header = chunk[:12]
+                size += len(chunk)
+                if size > PROFILE_IMAGE_MAX_SIZE:
+                    raise ValueError("Profile image is too large")
+                stored_file.write(chunk)
+
+        if not header or not _has_valid_image_signature(content_type, header):
+            raise ValueError("Invalid profile image content")
+    except Exception:
+        destination.unlink(missing_ok=True)
+        raise
+    finally:
+        await upload_file.close()
+
+    return str(destination)
+
+
+def delete_profile_image(file_path: str) -> None:
+    storage_root = get_profile_storage_root()
+    target_path = Path(file_path).resolve()
+    if not target_path.is_relative_to(storage_root):
+        raise ValueError("The profile image is outside the configured directory")
+    target_path.unlink(missing_ok=True)
 
 
 def delete_stored_file(

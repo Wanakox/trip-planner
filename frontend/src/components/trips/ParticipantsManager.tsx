@@ -28,6 +28,8 @@ import {
   getTripParticipants,
   updateParticipant,
 } from '../../api/trips'
+import { getCurrentUser } from '../../api/user'
+import { UserAvatar } from '../UserAvatar'
 import type {
   TripDetails,
   TripExpense,
@@ -75,6 +77,13 @@ export function ParticipantsManager({
     queryKey: ['expense-summary', tripId],
     queryFn: () => getExpenseSummary(tripId),
   })
+  const profileQuery = useQuery({
+    queryKey: ['current-user'],
+    queryFn: getCurrentUser,
+  })
+  const ownerName = profileQuery.data
+    ? `${profileQuery.data.name} ${profileQuery.data.surname}`.trim().toLocaleLowerCase()
+    : ''
 
   const totals = useMemo(
     () => summaryQuery.data
@@ -148,7 +157,9 @@ export function ParticipantsManager({
       <Stack spacing={1}>
         {participants.map((participant) => (
           <Stack key={participant.id} direction="row" spacing={1.25} sx={{ p: 1, alignItems: 'center', bgcolor: '#f7f9fc', borderRadius: '12px' }}>
-            <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.light', color: 'primary.main', fontSize: 12, fontWeight: 800 }}>{initials(participant.name)}</Avatar>
+            {profileQuery.data && participant.name.trim().toLocaleLowerCase() === ownerName
+              ? <UserAvatar user={profileQuery.data} size={34} />
+              : <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.light', color: 'primary.main', fontSize: 12, fontWeight: 800 }}>{initials(participant.name)}</Avatar>}
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography noWrap sx={{ fontSize: 13, fontWeight: 750 }}>{participant.name}</Typography>
               <Typography sx={{ color: 'text.secondary', fontSize: 12 }}>

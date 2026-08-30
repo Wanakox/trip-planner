@@ -1,3 +1,6 @@
+from pathlib import Path
+
+from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import (
@@ -5,6 +8,7 @@ from app.core.exceptions import (
     UsernameAlreadyRegisteredError,
 )
 from app.models.user import User
+from app.repositories.trip_repository import get_trips_by_user_id
 from app.repositories.user_repository import (
     delete_user,
     get_user_by_email,
@@ -15,6 +19,7 @@ from app.schemas.user import UserUpdate
 from app.services.currency_service import (
     validate_currency_code,
 )
+from app.core.storage import delete_profile_image, save_profile_image
 
 
 def update_current_user(
@@ -25,6 +30,9 @@ def update_current_user(
     update_data = user_data.model_dump(
         exclude_unset=True,
     )
+
+    # La foto solo puede cambiarse mediante el endpoint de subida validada.
+    update_data.pop("profile_photo", None)
 
     if "email" in update_data:
         normalized_email = str(
@@ -62,6 +70,8 @@ def update_current_user(
                 update_data["default_currency"]
             )
         )
+        for trip in get_trips_by_user_id(db=db, user_id=user.id):
+            trip.currency = update_data["default_currency"]
 
     for field, value in update_data.items():
         setattr(
@@ -76,11 +86,60 @@ def update_current_user(
     )
 
 
+async def upload_current_user_photo(
+    db: Session,
+    user: User,
+    photo: UploadFile,
+) -> User:
+    previous_photo = user.profile_photo
+    new_photo = await save_profile_image(photo, user.id)
+    user.profile_photo = new_photo
+
+    try:
+        updated_user = update_user(db=db, user=user)
+    except Exception:
+        delete_profile_image(new_photo)
+        raise
+
+    if previous_photo:
+        try:
+            delete_profile_image(previous_photo)
+        except (OSError, ValueError):
+            pass
+    return updated_user
+
+
+def get_current_user_photo_path(user: User) -> Path | None:
+    if not user.profile_photo:
+        return None
+    photo_path = Path(user.profile_photo).resolve()
+    if not photo_path.is_file():
+        return None
+    return photo_path
+
+
+def remove_current_user_photo(db: Session, user: User) -> None:
+    photo_path = user.profile_photo
+    user.profile_photo = None
+    update_user(db=db, user=user)
+    if photo_path:
+        try:
+            delete_profile_image(photo_path)
+        except (OSError, ValueError):
+            pass
+
+
 def delete_current_user(
     db: Session,
     user: User,
 ) -> None:
+    photo_path = user.profile_photo
     delete_user(
         db=db,
         user=user,
     )
+    if photo_path:
+        try:
+            delete_profile_image(photo_path)
+        except (OSError, ValueError):
+            pass

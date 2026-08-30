@@ -2,13 +2,13 @@ import FlightTakeoffOutlinedIcon from '@mui/icons-material/FlightTakeoffOutlined
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined'
 import MenuIcon from '@mui/icons-material/Menu'
 import {
-  Avatar,
   Box,
   Drawer,
   IconButton,
   Stack,
   Typography,
 } from '@mui/material'
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import {
   NavLink,
@@ -17,6 +17,8 @@ import {
 } from 'react-router-dom'
 
 import { BrandLogo } from '../BrandLogo'
+import { UserAvatar } from '../UserAvatar'
+import { getCurrentUser } from '../../api/user'
 
 const drawerWidth = 250
 
@@ -45,6 +47,10 @@ function DashboardSidebar({
   onNavigate?: () => void
 }) {
   const location = useLocation()
+  const profileQuery = useQuery({
+    queryKey: ['current-user'],
+    queryFn: getCurrentUser,
+  })
 
   return (
     <Stack
@@ -136,17 +142,7 @@ function DashboardSidebar({
           },
         }}
       >
-        <Avatar
-          sx={{
-            width: 42,
-            height: 42,
-            bgcolor: 'text.primary',
-            fontSize: 13,
-            fontWeight: 700,
-          }}
-        >
-          JG
-        </Avatar>
+        {profileQuery.data && <UserAvatar user={profileQuery.data} />}
 
         <Box sx={{ minWidth: 0 }}>
           <Typography
@@ -155,7 +151,9 @@ function DashboardSidebar({
               fontWeight: 700,
             }}
           >
-            Juan García
+            {profileQuery.data
+              ? `${profileQuery.data.name} ${profileQuery.data.surname}`
+              : 'Mi perfil'}
           </Typography>
 
           <Typography

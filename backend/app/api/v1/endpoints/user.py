@@ -3,10 +3,13 @@ from typing import Annotated
 from fastapi import (
     APIRouter,
     Depends,
+    File,
     HTTPException,
     Response,
     status,
+    UploadFile,
 )
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
@@ -24,7 +27,10 @@ from app.schemas.user import (
 )
 from app.services.user_service import (
     delete_current_user,
+    get_current_user_photo_path,
+    remove_current_user_photo,
     update_current_user,
+    upload_current_user_photo,
 )
 
 
@@ -117,3 +123,48 @@ def update_me(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Currency service is temporarily unavailable",
         ) from exc
+
+
+@router.post(
+    "/me/profile-photo",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Upload the authenticated user's profile photo",
+)
+async def upload_profile_photo(
+    current_user: CurrentUser,
+    db: DatabaseSession,
+    photo: UploadFile = File(...),
+) -> UserResponse:
+    try:
+        return await upload_current_user_photo(db, current_user, photo)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(exc),
+        ) from exc
+
+
+@router.get(
+    "/me/profile-photo",
+    response_class=FileResponse,
+    summary="Get the authenticated user's profile photo",
+)
+def get_profile_photo(current_user: CurrentUser) -> FileResponse:
+    photo_path = get_current_user_photo_path(current_user)
+    if photo_path is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return FileResponse(photo_path)
+
+
+@router.delete(
+    "/me/profile-photo",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete the authenticated user's profile photo",
+)
+def delete_profile_photo(
+    current_user: CurrentUser,
+    db: DatabaseSession,
+) -> Response:
+    remove_current_user_photo(db, current_user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

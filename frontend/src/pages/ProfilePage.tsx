@@ -1,10 +1,10 @@
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import PersonOutlineIcon from '@mui/icons-material/PersonOutlineOutlined'
+import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined'
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined'
 import {
   Alert,
-  Avatar,
   Box,
   Button,
   CircularProgress,
@@ -28,10 +28,13 @@ import { useNavigate } from 'react-router-dom'
 import { getCurrencies } from '../api/currency'
 import {
   deleteCurrentUser,
+  deleteCurrentUserPhoto,
   getCurrentUser,
   updateCurrentUser,
+  uploadCurrentUserPhoto,
 } from '../api/user'
-import type { UserProfilePayload } from '../api/user'
+import type { UserProfile, UserProfilePayload } from '../api/user'
+import { UserAvatar } from '../components/UserAvatar'
 import { clearStoredSession } from '../utils/authSession'
 
 const emptyForm: UserProfilePayload = {
@@ -41,10 +44,6 @@ const emptyForm: UserProfilePayload = {
   username: '',
   email: '',
   default_currency: 'EUR',
-}
-
-function getInitials(name: string, surname: string) {
-  return `${name.trim()[0] ?? ''}${surname.trim()[0] ?? ''}`.toUpperCase()
 }
 
 function profileToPayload(profile: UserProfilePayload): UserProfilePayload {
@@ -80,6 +79,7 @@ export function ProfilePage() {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [form, setForm] = useState<UserProfilePayload>(emptyForm)
+  const [photoValidationError, setPhotoValidationError] = useState('')
 
   const profileQuery = useQuery({
     queryKey: ['current-user'],
@@ -107,6 +107,26 @@ export function ProfilePage() {
     },
   })
 
+  const photoMutation = useMutation({
+    mutationFn: uploadCurrentUserPhoto,
+    onSuccess: (updatedUser) => {
+      setPhotoValidationError('')
+      queryClient.setQueryData(['current-user'], updatedUser)
+      queryClient.removeQueries({ queryKey: ['current-user-photo'] })
+    },
+  })
+
+  const removePhotoMutation = useMutation({
+    mutationFn: deleteCurrentUserPhoto,
+    onSuccess: () => {
+      queryClient.setQueryData(
+        ['current-user'],
+        (current: UserProfile | undefined) => current ? { ...current, profile_photo: null } : current,
+      )
+      queryClient.removeQueries({ queryKey: ['current-user-photo'] })
+    },
+  })
+
   const cancelEditing = () => {
     saveMutation.reset()
     setEditing(false)
@@ -120,8 +140,25 @@ export function ProfilePage() {
       surname: form.surname.trim(),
       username: form.username.trim(),
       email: form.email.trim().toLowerCase(),
-      profile_photo: form.profile_photo?.trim() || null,
+      profile_photo: form.profile_photo,
     })
+  }
+
+  const handlePhoto = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    photoMutation.reset()
+    setPhotoValidationError('')
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setPhotoValidationError('Selecciona una imagen JPG, PNG o WebP.')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoValidationError('La imagen no puede superar los 5 MB.')
+      return
+    }
+    photoMutation.mutate(file)
   }
 
   if (profileQuery.isLoading) {
@@ -154,14 +191,21 @@ export function ProfilePage() {
 
       <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: '22px', borderColor: '#dce3ec' }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2.5} sx={{ p: 3, alignItems: { sm: 'center' }, bgcolor: '#f7f9fc' }}>
-          <Avatar src={user.profile_photo ?? undefined} sx={{ width: 86, height: 86, bgcolor: 'primary.main', fontSize: 25, fontWeight: 850 }}>
-            {getInitials(user.name, user.surname)}
-          </Avatar>
+          <UserAvatar user={user} size={86} />
           <Box sx={{ flex: 1 }}>
             <Typography sx={{ fontSize: 22, fontWeight: 850 }}>{user.name} {user.surname}</Typography>
             <Typography sx={{ color: 'text.secondary' }}>@{user.username}</Typography>
             <Typography sx={{ mt: 0.5, color: 'text.secondary', fontSize: 13 }}>Identificador de cuenta: {user.id}</Typography>
           </Box>
+          <Stack spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'flex-end' } }}>
+            <Button component="label" variant="outlined" startIcon={<PhotoCameraOutlinedIcon />} disabled={photoMutation.isPending || removePhotoMutation.isPending}>
+              {photoMutation.isPending ? 'Subiendo...' : user.profile_photo ? 'Cambiar foto' : 'Añadir foto'}
+              <input hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhoto} />
+            </Button>
+            {user.profile_photo && <Button color="error" size="small" onClick={() => removePhotoMutation.mutate()} disabled={photoMutation.isPending || removePhotoMutation.isPending}>Eliminar foto</Button>}
+            {photoValidationError && <Typography color="error" sx={{ maxWidth: 260, fontSize: 12 }}>{photoValidationError}</Typography>}
+            {(photoMutation.isError || removePhotoMutation.isError) && <Typography color="error" sx={{ maxWidth: 260, fontSize: 12 }}>No se ha podido guardar la foto. Usa JPG, PNG o WebP de hasta 5 MB.</Typography>}
+          </Stack>
         </Stack>
 
         <Divider />
@@ -184,7 +228,6 @@ export function ProfilePage() {
               {(editing ? form.default_currency : user.default_currency) && !(currenciesQuery.data ?? []).some((currency) => currency.code === (editing ? form.default_currency : user.default_currency)) && <MenuItem value={editing ? form.default_currency : user.default_currency}>{editing ? form.default_currency : user.default_currency}</MenuItem>}
               {(currenciesQuery.data ?? []).map((currency) => <MenuItem key={currency.code} value={currency.code}>{currency.code} — {currency.name}</MenuItem>)}
             </TextField>
-            <TextField label="URL de la foto de perfil" value={(editing ? form.profile_photo : user.profile_photo) ?? ''} onChange={(event) => setForm((current) => ({ ...current, profile_photo: event.target.value || null }))} disabled={!editing} placeholder="https://…" slotProps={{ htmlInput: { maxLength: 500 } }} />
           </Box>
 
           {editing && <Stack direction="row" spacing={1.5} sx={{ mt: 3, justifyContent: 'flex-end' }}>
