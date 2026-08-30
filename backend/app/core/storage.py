@@ -11,7 +11,6 @@ PROFILE_IMAGE_MAX_SIZE = 5 * 1024 * 1024
 PROFILE_IMAGE_TYPES = {
     "image/jpeg": "jpg",
     "image/png": "png",
-    "image/webp": "webp",
 }
 
 
@@ -162,8 +161,6 @@ def _has_valid_image_signature(content_type: str, header: bytes) -> bool:
         return header.startswith(b"\xff\xd8\xff")
     if content_type == "image/png":
         return header.startswith(b"\x89PNG\r\n\x1a\n")
-    if content_type == "image/webp":
-        return header.startswith(b"RIFF") and header[8:12] == b"WEBP"
     return False
 
 

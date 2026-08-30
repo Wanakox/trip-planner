@@ -1,3 +1,4 @@
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 from fastapi import UploadFile
@@ -17,6 +18,7 @@ from app.repositories.user_repository import (
 )
 from app.schemas.user import UserUpdate
 from app.services.currency_service import (
+    convert_currency,
     validate_currency_code,
 )
 from app.core.storage import delete_profile_image, save_profile_image
@@ -65,13 +67,36 @@ def update_current_user(
             raise UsernameAlreadyRegisteredError
 
     if "default_currency" in update_data:
-        update_data["default_currency"] = (
+        target_currency = (
             validate_currency_code(
                 update_data["default_currency"]
             )
         )
-        for trip in get_trips_by_user_id(db=db, user_id=user.id):
-            trip.currency = update_data["default_currency"]
+        update_data["default_currency"] = target_currency
+
+        trips = get_trips_by_user_id(db=db, user_id=user.id)
+        conversion_rates: dict[str, Decimal] = {}
+
+        # Calculamos todas las conversiones antes de modificar entidades para
+        # que un fallo del proveedor no deje datos parcialmente actualizados.
+        for source_currency in {
+            trip.currency.upper()
+            for trip in trips
+            if trip.currency.upper() != target_currency
+        }:
+            conversion_rates[source_currency] = convert_currency(
+                amount=Decimal("1"),
+                from_currency=source_currency,
+                to_currency=target_currency,
+            ).rate
+
+        for trip in trips:
+            source_currency = trip.currency.upper()
+            if source_currency != target_currency:
+                trip.budget = (
+                    trip.budget * conversion_rates[source_currency]
+                ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            trip.currency = target_currency
 
     for field, value in update_data.items():
         setattr(

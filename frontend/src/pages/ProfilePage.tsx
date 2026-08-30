@@ -150,8 +150,8 @@ export function ProfilePage() {
     if (!file) return
     photoMutation.reset()
     setPhotoValidationError('')
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      setPhotoValidationError('Selecciona una imagen JPG, PNG o WebP.')
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+      setPhotoValidationError('Selecciona una imagen JPG o PNG.')
       return
     }
     if (file.size > 5 * 1024 * 1024) {
@@ -200,11 +200,11 @@ export function ProfilePage() {
           <Stack spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'flex-end' } }}>
             <Button component="label" variant="outlined" startIcon={<PhotoCameraOutlinedIcon />} disabled={photoMutation.isPending || removePhotoMutation.isPending}>
               {photoMutation.isPending ? 'Subiendo...' : user.profile_photo ? 'Cambiar foto' : 'Añadir foto'}
-              <input hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhoto} />
+              <input hidden type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={handlePhoto} />
             </Button>
             {user.profile_photo && <Button color="error" size="small" onClick={() => removePhotoMutation.mutate()} disabled={photoMutation.isPending || removePhotoMutation.isPending}>Eliminar foto</Button>}
             {photoValidationError && <Typography color="error" sx={{ maxWidth: 260, fontSize: 12 }}>{photoValidationError}</Typography>}
-            {(photoMutation.isError || removePhotoMutation.isError) && <Typography color="error" sx={{ maxWidth: 260, fontSize: 12 }}>No se ha podido guardar la foto. Usa JPG, PNG o WebP de hasta 5 MB.</Typography>}
+            {(photoMutation.isError || removePhotoMutation.isError) && <Typography color="error" sx={{ maxWidth: 260, fontSize: 12 }}>No se ha podido guardar la foto. Usa JPG o PNG de hasta 5 MB.</Typography>}
           </Stack>
         </Stack>
 

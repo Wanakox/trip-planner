@@ -3,10 +3,7 @@ from typing import Any
 import httpx
 
 from app.core.config import settings
-
-
-class CurrencyProviderError(Exception):
-    """Error producido al comunicarse con el proveedor de monedas."""
+from app.core.exceptions import CurrencyProviderError
 
 
 def get_available_currencies() -> dict[str, str]:
