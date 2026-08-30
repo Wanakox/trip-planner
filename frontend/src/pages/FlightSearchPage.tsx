@@ -58,9 +58,10 @@ function OfferCard({ offer, cabin }: { offer: FlightOffer; cabin: CabinClass }) 
 
 export function FlightSearchPage() {
   const [roundTrip, setRoundTrip] = useState(true)
+  const [visibleOffers, setVisibleOffers] = useState(10)
   const [form, setForm] = useState<FlightSearchParams>({ origin: '', destination: '', departure_date: isoDate(1), return_date: isoDate(8), adults: 1, cabin_class: 'economy' })
   const mutation = useMutation({ mutationFn: searchFlights })
-  const submit = (event: React.FormEvent<HTMLFormElement>) => { event.preventDefault(); mutation.mutate({ ...form, origin: form.origin.trim().toUpperCase(), destination: form.destination.trim().toUpperCase(), return_date: roundTrip ? form.return_date : undefined }) }
+  const submit = (event: React.FormEvent<HTMLFormElement>) => { event.preventDefault(); setVisibleOffers(10); mutation.mutate({ ...form, origin: form.origin.trim().toUpperCase(), destination: form.destination.trim().toUpperCase(), return_date: roundTrip ? form.return_date : undefined }) }
   const swap = () => { setForm((current) => ({ ...current, origin: current.destination, destination: current.origin })); mutation.reset() }
 
   return <Box component="main" sx={{ minHeight: '100dvh', px: { xs: 2, sm: 3, md: 5, lg: 6 }, pt: { xs: 10, md: 5 }, pb: 5 }}><Box sx={{ maxWidth: 1400, mx: 'auto' }}>
@@ -80,7 +81,11 @@ export function FlightSearchPage() {
     </Paper>
     {mutation.isError && <Alert severity="error" sx={{ mt: 3 }}>{errorMessage(mutation.error)}</Alert>}
     {mutation.data && <Box sx={{ mt: 4 }}><Stack direction={{ xs: 'column', sm: 'row' }} sx={{ mb: 2, gap: 1, justifyContent: 'space-between' }}><Box><Typography component="h2" sx={{ fontSize: 22, fontWeight: 850 }}>{mutation.data.origin} → {mutation.data.destination}</Typography><Typography color="text.secondary" sx={{ fontSize: 13 }}>{mutation.data.offers.length} resultados · {mutation.data.adults} {mutation.data.adults === 1 ? 'adulto' : 'adultos'} · {cabinLabels[mutation.data.cabin_class]}</Typography></Box><Chip label="Ordenados por precio" variant="outlined" /></Stack>
-      {mutation.data.offers.length ? <Stack spacing={2}>{mutation.data.offers.map((offer) => <OfferCard key={offer.id} offer={offer} cabin={mutation.data.cabin_class} />)}</Stack> : <Paper variant="outlined" sx={{ p: 5, textAlign: 'center', borderRadius: '18px' }}><AirplanemodeActiveOutlinedIcon sx={{ fontSize: 42, color: 'text.secondary' }} /><Typography sx={{ mt: 1, fontWeight: 750 }}>No se han encontrado vuelos</Typography><Typography color="text.secondary" sx={{ fontSize: 13 }}>Prueba con otras fechas o aeropuertos.</Typography></Paper>}
+      {mutation.data.offers.length ? <Stack spacing={2}>
+        {mutation.data.offers.slice(0, visibleOffers).map((offer) => <OfferCard key={offer.id} offer={offer} cabin={mutation.data.cabin_class} />)}
+        {visibleOffers < mutation.data.offers.length && <Button variant="outlined" size="large" onClick={() => setVisibleOffers((current) => current + 10)} sx={{ alignSelf: 'center', minWidth: 220 }}>Mostrar 10 más</Button>}
+        <Typography color="text.secondary" sx={{ textAlign: 'center', fontSize: 12 }}>Mostrando {Math.min(visibleOffers, mutation.data.offers.length)} de {mutation.data.offers.length} ofertas</Typography>
+      </Stack> : <Paper variant="outlined" sx={{ p: 5, textAlign: 'center', borderRadius: '18px' }}><AirplanemodeActiveOutlinedIcon sx={{ fontSize: 42, color: 'text.secondary' }} /><Typography sx={{ mt: 1, fontWeight: 750 }}>No se han encontrado vuelos</Typography><Typography color="text.secondary" sx={{ fontSize: 13 }}>Prueba con otras fechas o aeropuertos.</Typography></Paper>}
     </Box>}
   </Box></Box>
 }
