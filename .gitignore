@@ -1,0 +1,158 @@
+# ============================================================
+# Environment variables and secrets
+# ============================================================
+
+.env
+.env.*
+!.env.example
+
+# ============================================================
+# Python
+# ============================================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+*.so
+
+.Python
+.python-version
+
+.venv/
+venv/
+env/
+ENV/
+
+pip-wheel-metadata/
+wheels/
+*.egg
+*.egg-info/
+.eggs/
+
+build/
+develop-eggs/
+downloads/
+sdist/
+var/
+parts/
+share/python-wheels/
+
+# ============================================================
+# Python testing and code quality
+# ============================================================
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+.hypothesis/
+.tox/
+.nox/
+
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# ============================================================
+# Database and local backend data
+# ============================================================
+
+*.sqlite
+*.sqlite3
+instance/
+
+# ============================================================
+# Application-generated content
+# ============================================================
+
+uploads/
+generated/
+tmp/
+temp/
+
+# ============================================================
+# Node.js / React
+# ============================================================
+
+node_modules/
+
+dist/
+coverage/
+.vite/
+.vite-cache/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ============================================================
+# Frontend environment files
+# ============================================================
+
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# ============================================================
+# Backend environment files
+# ============================================================
+
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# ============================================================
+# Editors and IDEs
+# ============================================================
+
+.vscode/
+.idea/
+
+*.swp
+*.swo
+*.swn
+*~
+
+# ============================================================
+# Operating system files
+# ============================================================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# ============================================================
+# Logs and runtime files
+# ============================================================
+
+*.log
+logs/
+*.pid
+*.pid.lock
+coverage/
+htmlcov/
+.coverage
+
+# ============================================================
+# Docker local overrides
+# ============================================================
+
+docker-compose.override.yml
+compose.override.yml
+
+# ============================================================
+# Backend storage
+# ============================================================
+
+backend/storage/*
+!backend/storage/.gitkeep
+!backend/storage/profile/
+!backend/storage/profile/.gitkeep
+!backend/storage/trips/
+!backend/storage/trips/.gitkeep
