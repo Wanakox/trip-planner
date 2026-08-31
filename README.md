@@ -218,6 +218,47 @@ The internal structures of `backend/` and `frontend/` will be documented in thei
 
 ---
 
+## Run with Docker Compose
+
+Create the local environment file and replace the example secrets:
+
+```bash
+cp .env.example .env
+```
+
+Build and start the complete application:
+
+```bash
+docker compose up -d --build
+```
+
+The services are available at:
+
+| Service | Default URL |
+|---|---|
+| Frontend | `http://localhost:5173` |
+| Backend API documentation | `http://localhost:8000/docs` |
+| pgAdmin | `http://localhost:5050` |
+
+Check container health and inspect logs:
+
+```bash
+docker compose ps
+docker compose logs -f frontend backend
+```
+
+Stop the application without deleting database data:
+
+```bash
+docker compose down
+```
+
+The frontend is built as static assets and served by Nginx. Requests to `/api` are proxied through
+the internal Docker network to FastAPI, and unknown browser routes fall back to `index.html` so
+React Router works after a page refresh.
+
+---
+
 ## Documentation
 
 ### Analysis
