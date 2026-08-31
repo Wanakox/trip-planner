@@ -65,7 +65,9 @@ export function FlightSearchPage() {
   const swap = () => { setForm((current) => ({ ...current, origin: current.destination, destination: current.origin })); mutation.reset() }
 
   return <Box component="main" sx={{ minHeight: '100dvh', px: { xs: 2, sm: 3, md: 5, lg: 6 }, pt: { xs: 10, md: 5 }, pb: 5 }}><Box sx={{ maxWidth: 1400, mx: 'auto' }}>
-    <Typography component="h1" sx={{ fontSize: { xs: 32, md: 38 }, fontWeight: 850, letterSpacing: -.8 }}>Buscar vuelos</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>Consulta vuelos para preparar tu próximo viaje.</Typography>\n    <Alert severity="info" sx={{ mt: 2.5 }}>Entorno de demostración: los vuelos, horarios y precios proceden del modo de prueba de Duffel y pueden no representar ofertas reales.</Alert>
+    <Typography component="h1" sx={{ fontSize: { xs: 32, md: 38 }, fontWeight: 850, letterSpacing: -.8 }}>Buscar vuelos</Typography>
+    <Typography color="text.secondary" sx={{ mt: 1 }}>Consulta vuelos para preparar tu próximo viaje.</Typography>
+    <Alert severity="info" sx={{ mt: 2.5 }}>Entorno de demostración: los vuelos, horarios y precios proceden del modo de prueba de Duffel y pueden no representar ofertas reales.</Alert>
     <Paper component="form" onSubmit={submit} variant="outlined" sx={{ mt: 3.5, p: { xs: 2, md: 3 }, borderRadius: '20px', borderColor: '#dce3ec' }}>
       <Stack direction="row" spacing={1} sx={{ mb: 2.5 }}><Button size="small" variant={roundTrip ? 'contained' : 'text'} onClick={() => setRoundTrip(true)}>Ida y vuelta</Button><Button size="small" variant={!roundTrip ? 'contained' : 'text'} onClick={() => { setRoundTrip(false); mutation.reset() }}>Solo ida</Button></Stack>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr auto 1fr 1fr 1fr', xl: '1fr auto 1fr 1fr 1fr .65fr .85fr' }, gap: 1.5, alignItems: 'start' }}>
