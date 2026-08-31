@@ -135,6 +135,9 @@ Desktop.ini
 logs/
 *.pid
 *.pid.lock
+coverage/
+htmlcov/
+.coverage
 
 # ============================================================
 # Docker local overrides
