@@ -19,19 +19,25 @@ def make_trip(status: TripStatus) -> SimpleNamespace:
 def test_in_progress_trip_allows_reached_days() -> None:
     trip = make_trip(TripStatus.IN_PROGRESS)
 
-    assert get_max_available_note_day(
-        trip,
-        current_date=date(2026, 8, 12),
-    ) == 3
+    assert (
+        get_max_available_note_day(
+            trip,
+            current_date=date(2026, 8, 12),
+        )
+        == 3
+    )
 
 
 def test_in_progress_trip_never_exceeds_duration() -> None:
     trip = make_trip(TripStatus.IN_PROGRESS)
 
-    assert get_max_available_note_day(
-        trip,
-        current_date=date(2026, 8, 30),
-    ) == 7
+    assert (
+        get_max_available_note_day(
+            trip,
+            current_date=date(2026, 8, 30),
+        )
+        == 7
+    )
 
 
 def test_completed_trip_allows_every_day() -> None:

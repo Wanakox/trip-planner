@@ -14,6 +14,9 @@ EXPECTED_OPERATIONS = {
     ("GET", "/api/v1/users/me"),
     ("PATCH", "/api/v1/users/me"),
     ("DELETE", "/api/v1/users/me"),
+    ("GET", "/api/v1/users/me/profile-photo"),
+    ("POST", "/api/v1/users/me/profile-photo"),
+    ("DELETE", "/api/v1/users/me/profile-photo"),
     ("GET", "/api/v1/trips"),
     ("POST", "/api/v1/trips"),
     ("GET", "/api/v1/trips/{trip_id}"),
@@ -95,6 +98,7 @@ def test_operation_ids_are_unique() -> None:
 PROTECTED_REQUESTS = [
     ("get", "/api/v1/users/me"),
     ("delete", "/api/v1/users/me"),
+    ("get", "/api/v1/users/me/profile-photo"),
     ("get", "/api/v1/trips"),
     ("get", "/api/v1/trips/1"),
     ("get", "/api/v1/trips/1/activities"),
