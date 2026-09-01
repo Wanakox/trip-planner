@@ -523,3 +523,17 @@ export async function downloadTripExport(
 
   return data
 }
+
+export async function getTripFileContent(
+  tripId: number,
+  fileId: number,
+): Promise<Blob> {
+  const { data } = await httpClient.get<Blob>(
+    `/trips/${tripId}/files/${fileId}/content`,
+    {
+      responseType: 'blob',
+    },
+  )
+
+  return data
+}

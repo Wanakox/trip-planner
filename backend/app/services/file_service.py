@@ -267,3 +267,32 @@ def delete_file_from_trip(
         db=db,
         trip_file=trip_file,
     )
+
+def get_trip_file_path(
+    db: Session,
+    trip_id: int,
+    file_id: int,
+    user: User,
+) -> tuple[Path, TripFile]:
+    trip = get_trip_or_raise(
+        db=db,
+        trip_id=trip_id,
+        user_id=user.id,
+    )
+
+    validate_completed_trip(
+        trip=trip,
+    )
+
+    trip_file = get_trip_file_or_raise(
+        db=db,
+        trip_id=trip.id,
+        file_id=file_id,
+    )
+
+    file_path = Path(trip_file.path)
+
+    if not file_path.is_file():
+        raise TripFileNotFoundError
+
+    return file_path, trip_file
