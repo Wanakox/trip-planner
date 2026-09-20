@@ -156,3 +156,7 @@ backend/storage/*
 !backend/storage/profile/.gitkeep
 !backend/storage/trips/
 !backend/storage/trips/.gitkeep
+
+# Archivos subidos por usuarios
+backend/storage/profile/
+backend/storage/trips/
