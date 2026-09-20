@@ -1,6 +1,7 @@
 import AddIcon from '@mui/icons-material/Add'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import {
   Alert,
   Box,
@@ -20,7 +21,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import { useRef, useState } from 'react'
 
-import { deleteTripFile, getTripFiles, uploadTripFiles } from '../../api/trips'
+import { deleteTripFile, getTripFileContent, getTripFiles, uploadTripFiles } from '../../api/trips'
 import type { TripDetails, TripFile } from '../../types/trip'
 
 function formatSize(size: number) {
@@ -56,6 +57,8 @@ export function DocumentsManager({
   const [files, setFiles] = useState(initialFiles)
   const [toDelete, setToDelete] = useState<TripFile | null>(null)
   const [selectionError, setSelectionError] = useState<string | null>(null)
+  const [openingFileId, setOpeningFileId] = useState<number | null>(null)
+  const [openError, setOpenError] = useState<string | null>(null)
 
   const sync = (next: TripFile[]) => {
     setFiles(next)
@@ -96,18 +99,40 @@ export function DocumentsManager({
     uploadMutation.mutate(next)
   }
 
+  const openFile = async (file: TripFile) => {
+    setOpeningFileId(file.id)
+    setOpenError(null)
+    const newWindow = window.open('', '_blank')
+    if (!newWindow) {
+      setOpeningFileId(null)
+      setOpenError('El navegador ha bloqueado la apertura del archivo.')
+      return
+    }
+    try {
+      const blob = await getTripFileContent(tripId, file.id)
+      const url = URL.createObjectURL(blob)
+      newWindow.location.href = url
+      setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    } catch {
+      newWindow.close()
+      setOpenError('No se ha podido abrir el documento.')
+    } finally {
+      setOpeningFileId(null)
+    }
+  }
+
   return (
     <Paper variant="outlined" sx={{ p: 2.25, borderRadius: '18px', borderColor: '#dce3ec' }}>
       <Stack direction="row" sx={{ mb: 1.5, gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography component="h2" sx={{ fontSize: 16, fontWeight: 800 }}>Documentos</Typography>
         <Button component="label" size="small" startIcon={<AddIcon />} disabled={!tripCompleted || uploadMutation.isPending || files.length >= 10} sx={{ minHeight: 32 }}>
           {uploadMutation.isPending ? 'Subiendo...' : 'Subir'}
-          <input ref={inputRef} hidden type="file" multiple onChange={(event) => selectFiles(event.target.files)} />
+          <input ref={inputRef} hidden type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onChange={(event) => selectFiles(event.target.files)} />
         </Button>
       </Stack>
 
       {!tripCompleted && <Alert severity="info">Los documentos estarán disponibles cuando el viaje esté completado.</Alert>}
-      {(selectionError || uploadMutation.isError || deleteMutation.isError) && <Alert severity="error" sx={{ mb: 2 }}>{selectionError || (uploadMutation.isError ? uploadErrorMessage(uploadMutation.error) : 'No se ha podido eliminar el documento.')}</Alert>}
+      {(selectionError || openError || uploadMutation.isError || deleteMutation.isError) && <Alert severity="error" sx={{ mb: 2 }}>{selectionError || openError || (uploadMutation.isError ? uploadErrorMessage(uploadMutation.error) : 'No se ha podido eliminar el documento.')}</Alert>}
       {uploadMutation.isPending && <LinearProgress sx={{ mb: 2 }} />}
 
       {tripCompleted && <Stack spacing={1}>
@@ -115,9 +140,10 @@ export function DocumentsManager({
           <Stack key={file.id} direction="row" spacing={1.25} sx={{ p: 1, bgcolor: '#f7f9fc', borderRadius: '10px', alignItems: 'center' }}>
             <DescriptionOutlinedIcon color="primary" />
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography noWrap title={`${file.name}.${file.extension}`} sx={{ fontSize: 12, fontWeight: 700 }}>{file.name}.{file.extension}</Typography>
+              <Typography noWrap title={file.name} sx={{ fontSize: 12, fontWeight: 700 }}>{file.name}</Typography>
               <Typography sx={{ color: 'text.secondary', fontSize: 11 }}>{formatSize(file.size)}</Typography>
             </Box>
+            <IconButton size="small" color="primary" title="Abrir" aria-label={`Abrir ${file.name}`} disabled={openingFileId === file.id} onClick={() => { void openFile(file) }}><OpenInNewIcon fontSize="small" /></IconButton>
             <IconButton size="small" color="error" aria-label={`Eliminar ${file.name}`} onClick={() => { deleteMutation.reset(); setToDelete(file) }}><DeleteOutlineIcon fontSize="small" /></IconButton>
           </Stack>
         ))}
@@ -127,7 +153,7 @@ export function DocumentsManager({
 
       <Dialog open={Boolean(toDelete)} onClose={() => !deleteMutation.isPending && setToDelete(null)} fullWidth maxWidth="xs">
         <DialogTitle>Eliminar documento</DialogTitle>
-        <DialogContent><DialogContentText>¿Quieres eliminar «{toDelete?.name}.{toDelete?.extension}»? Esta acción no se puede deshacer.</DialogContentText></DialogContent>
+        <DialogContent><DialogContentText>¿Quieres eliminar «{toDelete?.name}»? Esta acción no se puede deshacer.</DialogContentText></DialogContent>
         <DialogActions><Button onClick={() => setToDelete(null)} disabled={deleteMutation.isPending}>Cancelar</Button><Button color="error" variant="contained" disabled={deleteMutation.isPending} onClick={() => { if (toDelete) deleteMutation.mutate(toDelete.id) }}>{deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}</Button></DialogActions>
       </Dialog>
     </Paper>

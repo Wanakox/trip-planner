@@ -888,12 +888,37 @@ def add_timeline_visual(
         )
     )
 
-    story.append(
-        SegmentedTimelineFlowable(
-            days=timeline.days,
-            days_per_row=7,
+    days_per_page = 28
+    day_chunks = [
+        timeline.days[index:index + days_per_page]
+        for index in range(0, len(timeline.days), days_per_page)
+    ]
+
+    for index, chunk in enumerate(day_chunks):
+        if index > 0:
+            story.append(PageBreak())
+            story.append(
+                Paragraph(
+                    "Línea temporal (continuación)",
+                    styles["section"],
+                )
+            )
+            story.append(
+                HRFlowable(
+                    width="100%",
+                    thickness=1.0,
+                    color=PRIMARY_COLOR,
+                    spaceBefore=0,
+                    spaceAfter=10,
+                )
+            )
+
+        story.append(
+            SegmentedTimelineFlowable(
+                days=chunk,
+                days_per_row=7,
+            )
         )
-    )
 
     story.append(
         Spacer(
