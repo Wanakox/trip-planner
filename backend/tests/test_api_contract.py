@@ -62,6 +62,7 @@ EXPECTED_OPERATIONS = {
     ("DELETE", "/api/v1/trips/{trip_id}/notes/{note_id}"),
     ("GET", "/api/v1/trips/{trip_id}/files"),
     ("POST", "/api/v1/trips/{trip_id}/files"),
+    ("GET", "/api/v1/trips/{trip_id}/files/{file_id}/content"),
     ("DELETE", "/api/v1/trips/{trip_id}/files/{file_id}"),
     ("GET", "/api/v1/trips/{trip_id}/timeline"),
     ("GET", "/api/v1/trips/{trip_id}/export"),
@@ -109,6 +110,7 @@ PROTECTED_REQUESTS = [
     ("get", "/api/v1/trips/1/checklist"),
     ("get", "/api/v1/trips/1/notes"),
     ("get", "/api/v1/trips/1/files"),
+    ("get", "/api/v1/trips/1/files/1/content"),
     ("get", "/api/v1/trips/1/timeline"),
     ("get", "/api/v1/trips/1/export"),
 ]

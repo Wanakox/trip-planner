@@ -530,7 +530,9 @@ export async function getTripFileContent(
 ): Promise<Blob> {
   const { data } = await httpClient.get<Blob>(
     `/trips/${tripId}/files/${fileId}/content`,
-    { responseType: 'blob' },
+    {
+      responseType: 'blob',
+    },
   )
   return data
 }
